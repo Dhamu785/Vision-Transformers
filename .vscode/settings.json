@@ -1,0 +1,8 @@
+{
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.cursorBlinking": "smooth",
+    "editor.cursorStyle": "line",
+    "editor.cursorWidth": 3,
+    "editor.fontSize": 14,
+    "files.autoSave": "onWindowChange"
+}
