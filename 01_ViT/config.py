@@ -1,0 +1,11 @@
+class config:
+    batch_size = 32
+    num_classes = 10
+    num_channels =  1
+    img_size = 28
+    patch_size = 7
+    patch_num = 16
+    attention_head = 4
+    embedding_dim = 24
+    transformer_block = 4
+    mlp_nodes = 64
