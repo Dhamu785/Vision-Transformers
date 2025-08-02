@@ -34,3 +34,17 @@ class TransformerEncoder(t.nn.Module):
         res2 = x
         x = self.mlp(self.layer_norm2(x)) + res2
         return x
+
+class MLP(t.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.norm = t.nn.LayerNorm(info.embedding_dim)
+        self.linear_layers = t.nn.Sequential(
+            t.nn.Linear(info.embedding_dim, info.mlp_nodes),
+            t.nn.ReLU(),
+            t.nn.Linear(info.mlp_nodes, info.num_classes)
+        )
+
+    def forward(self, x: t.Tensor) -> t.Tensor:
+        x = self.linear_layers(self.norm(x))
+        return x
