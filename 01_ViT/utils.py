@@ -13,3 +13,15 @@ def get_loaders(batch_size: int):
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     return train_loader, test_loader
+
+class model_utils:
+    def __init__(self, device: str, optimizer: t.optim.Optimizer, 
+                    loss: t.nn.modules.loss._Loss,
+                    train_dataloader: t.utils.data.DataLoader, 
+                    val_dataloader: t.utils.data.DataLoader, epochs: int) -> None:
+        self.device = device
+        self.epochs = epochs
+        self.loss = loss
+        self.optimizer = optimizer
+        self.train_data = train_dataloader
+        self.val_data = val_dataloader
