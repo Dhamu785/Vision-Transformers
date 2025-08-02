@@ -48,3 +48,22 @@ class MLP(t.nn.Module):
     def forward(self, x: t.Tensor) -> t.Tensor:
         x = self.linear_layers(self.norm(x))
         return x
+
+class ViT(t.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.get_embed = PatchEmbeddings()
+        self.cls = t.nn.Parameter(t.nn.randn(1, 1, info.embedding_dim))
+        self.pos_emb = t.nn.Parameter(t.nn.randn(1, info.patch_num+1, info.embedding_dim))
+        self.transformer_block = t.nn.Sequential(*[TransformerEncoder() for _ in range(info.transformer_block)])
+        self.mlp = MLP()
+
+    def forward(self, x:t.Tensor) -> t.Tensor:
+        x = self.get_embed(x)
+        B = x.shape[0]
+        cls_tkn = self.pos_emb.expand(B,-1,-1)
+        x = t.concat((cls_tkn, x), dim=1)
+        x = x + self.pos_emb
+        x = self.transformer_block(x)[:,0]
+        x = self.mlp(x)
+        return x
