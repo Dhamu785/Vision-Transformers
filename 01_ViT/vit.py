@@ -30,7 +30,7 @@ class TransformerEncoder(t.nn.Module):
 
     def forward(self, x:t.Tensor) -> t.Tensor:
         res1 = x
-        x = self.MHA(self.layer_norm1(x)) + res1
+        x = self.MHA(self.layer_norm1(x), self.layer_norm1(x), self.layer_norm1(x))[0] + res1
         res2 = x
         x = self.mlp(self.layer_norm2(x)) + res2
         return x
@@ -53,16 +53,19 @@ class ViT(t.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.get_embed = PatchEmbeddings()
-        self.cls = t.nn.Parameter(t.nn.randn(1, 1, info.embedding_dim))
-        self.pos_emb = t.nn.Parameter(t.nn.randn(1, info.patch_num+1, info.embedding_dim))
+        self.cls = t.nn.Parameter(t.randn(1, 1, info.embedding_dim))
+        self.pos_emb = t.nn.Parameter(t.randn(1, info.patch_num+1, info.embedding_dim))
         self.transformer_block = t.nn.Sequential(*[TransformerEncoder() for _ in range(info.transformer_block)])
         self.mlp = MLP()
 
     def forward(self, x:t.Tensor) -> t.Tensor:
         x = self.get_embed(x)
+        print(x.shape)
         B = x.shape[0]
-        cls_tkn = self.pos_emb.expand(B,-1,-1)
+        cls_tkn = self.cls.expand(B,-1,-1)
+        print("cls", cls_tkn.shape)
         x = t.concat((cls_tkn, x), dim=1)
+        print(x.shape)
         x = x + self.pos_emb
         x = self.transformer_block(x)[:,0]
         x = self.mlp(x)
