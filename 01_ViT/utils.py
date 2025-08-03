@@ -25,3 +25,9 @@ class model_utils:
         self.optimizer = optimizer
         self.train_data = train_dataloader
         self.val_data = val_dataloader
+        self.scalar = t.GradScaler(device=device)
+
+    def calc_acc(self, predictions: t.Tensor, y: t.Tensor) -> float:
+        predictions = t.argmax(t.softmax(predictions, dim=1), dim=1)
+        score = (predictions == y).mean()
+        return score
