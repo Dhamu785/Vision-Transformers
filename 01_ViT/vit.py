@@ -60,12 +60,9 @@ class ViT(t.nn.Module):
 
     def forward(self, x:t.Tensor) -> t.Tensor:
         x = self.get_embed(x)
-        print(x.shape)
         B = x.shape[0]
         cls_tkn = self.cls.expand(B,-1,-1)
-        print("cls", cls_tkn.shape)
         x = t.concat((cls_tkn, x), dim=1)
-        print(x.shape)
         x = x + self.pos_emb
         x = self.transformer_block(x)[:,0]
         x = self.mlp(x)

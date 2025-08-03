@@ -1,21 +1,16 @@
 # %%
 from vit import ViT
 import torch as t
-# %%
-x = t.randn(8, 1, 28, 28)
-print(x.shape)
+import utils
 # %%
 model = ViT()
 # %%
-y = model(x)
+train, val = utils.get_loaders(32)
 # %%
-y.shape
+optimizer = t.optim.Adam(model.parameters(), lr=0.001)
+loss = t.nn.CrossEntropyLoss()
 # %%
-import utils
+model_pack = utils.model_utils('cpu', optimizer, loss, train, val, 2)
 # %%
-trian, test = utils.get_loaders(32)
-# %%
-len(trian)
-# %%
-next(iter(trian))[1]
+info = model_pack.train_model(model)
 # %%

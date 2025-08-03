@@ -34,8 +34,8 @@ class model_utils:
         self.val_len = len(val_dataloader)
 
     def calc_acc(self, predictions: t.Tensor, y: t.Tensor) -> t.Tensor:
-        predictions = t.argmax(t.softmax(predictions, dim=1), dim=1)
-        score = (predictions == y).mean()
+        predictions = t.argmax(t.softmax(predictions, dim=1), dim=1).to(dtype=t.long)
+        score = (predictions == y).sum() / len(y)
         return score
     
     def train_model(self, model:t.nn.Module) -> Tuple[List,List,List,List]:
@@ -53,7 +53,7 @@ class model_utils:
 
             for x, y in self.train_data:
                 x = x.to(self.device)
-                y = y.to(self.device)
+                y = y.to(self.device, dtype=t.long)
                 
                 # 1. gradients = 0
                 self.optimizer.zero_grad()
@@ -87,7 +87,7 @@ class model_utils:
             running_val_loss = 0
             for x,y in self.val_data:
                 x = x.to(self.device)
-                y = y.to(self.device)
+                y = y.to(self.device, dtype=t.long)
 
                 with t.inference_mode():
                     with t.autocast(device_type=self.device):
@@ -110,4 +110,4 @@ class model_utils:
                 os.mkdir(sav_loc)
             t.save(model.state_dict(), os.path.join(sav_loc, f'model-{epoch}.pt'))
         
-        print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')
+            print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')
