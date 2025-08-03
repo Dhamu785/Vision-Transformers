@@ -24,7 +24,8 @@ class model_utils:
     def __init__(self, device: str, optimizer: t.optim.Optimizer, 
                     loss: t.nn.modules.loss._Loss,
                     train_dataloader: t.utils.data.DataLoader, 
-                    val_dataloader: t.utils.data.DataLoader, epochs: int) -> None:
+                    val_dataloader: t.utils.data.DataLoader, 
+                    epochs: int, save_model:bool=True) -> None:
         self.device = device
         self.epochs = epochs
         self.loss = loss
@@ -34,10 +35,11 @@ class model_utils:
         self.scalar = t.GradScaler(device=device)
         self.train_len = len(train_dataloader)
         self.val_len = len(val_dataloader)
+        self.save_model = save_model
 
     def calc_acc(self, predictions: t.Tensor, y: t.Tensor) -> t.Tensor:
-        predictions = t.argmax(t.softmax(predictions, dim=1), dim=1).to(dtype=t.long)
-        score = (predictions == y).sum() / len(y)
+        predictions = t.argmax(predictions, dim=1).to(dtype=t.long)
+        score = (predictions == y).float().mean()
         return score
     
     def train_model(self, model:t.nn.Module) -> Tuple[List,List,List,List]:
@@ -101,16 +103,17 @@ class model_utils:
                 bar_val.update(1)
             
             bar_val.close()
-            val_acc.append(running_acc/self.val_len)
-            val_loss.append(running_loss/self.val_len)
+            val_acc.append(running_val_acc/self.val_len)
+            val_loss.append(running_val_loss/self.val_len)
             sav_loc = os.path.join(os.getcwd(), 'runs')
-            if os.path.exists(sav_loc):
-                if epoch == 1:
-                    shutil.rmtree(sav_loc)
+            if self.save_model:
+                if os.path.exists(sav_loc):
+                    if epoch == 1:
+                        shutil.rmtree(sav_loc)
+                        os.mkdir(sav_loc)
+                else:
                     os.mkdir(sav_loc)
-            else:
-                os.mkdir(sav_loc)
-            t.save(model.state_dict(), os.path.join(sav_loc, f'model-{epoch}.pt'))
+                t.save(model.state_dict(), os.path.join(sav_loc, f'model-{epoch}.pt'))
         
             print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')
 
