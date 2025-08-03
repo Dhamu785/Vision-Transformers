@@ -2,6 +2,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torch as t
 import torchvision as tv
+from typing import Tuple, List
+from tqdm import tqdm
+import os
+import shutil
 
 def get_loaders(batch_size: int):
     simple_transform = transforms.Compose([transforms.ToTensor()])
@@ -26,8 +30,84 @@ class model_utils:
         self.train_data = train_dataloader
         self.val_data = val_dataloader
         self.scalar = t.GradScaler(device=device)
+        self.train_len = len(train_dataloader)
+        self.val_len = len(val_dataloader)
 
-    def calc_acc(self, predictions: t.Tensor, y: t.Tensor) -> float:
+    def calc_acc(self, predictions: t.Tensor, y: t.Tensor) -> t.Tensor:
         predictions = t.argmax(t.softmax(predictions, dim=1), dim=1)
         score = (predictions == y).mean()
         return score
+    
+    def train_model(self, model:t.nn.Module) -> Tuple[List,List,List,List]:
+        model.to(device=self.device)
+        train_loss = []
+        train_acc = []
+        val_loss = []
+        val_acc = []
+
+        for epoch in range(1, self.epochs+1):
+            running_loss = 0
+            running_acc = 0
+            model.train()
+            bar_train = tqdm(self.train_len, desc="Batch trained", unit="batchs", colour="GREEN")
+
+            for x, y in self.train_data:
+                x = x.to(self.device)
+                y = y.to(self.device)
+                
+                # 1. gradients = 0
+                self.optimizer.zero_grad()
+                with t.autocast(device_type=self.device):
+                    # 2. Forward pass
+                    predictions = model(x)
+                    # 3. Calculate the loss
+                    loss : t.Tensor = self.loss(predictions, y)
+
+                acc = self.calc_acc(predictions=predictions.detach().clone(), y=y)
+                # 4. Scale the loss
+                self.scalar.scale(loss).backward()
+                # 5. Safely apply the gradient updates
+                self.scalar.step(self.optimizer)
+                # 6. Update the scale factor based on success/failure
+                self.scalar.update()
+
+                running_acc += acc.item()
+                running_loss += loss.item()
+
+                bar_train.set_postfix(loss=loss.item(), acc=acc.item())
+                bar_train.update(1)
+            
+            bar_train.close()
+            train_acc.append(running_acc/self.train_len)
+            train_loss.append(running_loss/self.train_len)
+
+            bar_val = tqdm(self.val_len, desc='Validation', unit='batches', colour='RED')
+            model.eval()
+            running_val_acc = 0
+            running_val_loss = 0
+            for x,y in self.val_data:
+                x = x.to(self.device)
+                y = y.to(self.device)
+
+                with t.inference_mode():
+                    with t.autocast(device_type=self.device):
+                        predictions = model(x)
+                        loss = self.loss(predictions, y)
+                    acc = self.calc_acc(predictions=predictions.detach().clone(), y=y)
+                    running_val_acc += acc.item()
+                    running_val_loss += loss.item()
+                bar_val.update(1)
+            
+            bar_val.close()
+            val_acc.append(running_acc/self.val_len)
+            val_loss.append(running_loss/self.val_len)
+            sav_loc = os.path.join(os.getcwd(), 'runs')
+            if os.path.exists(sav_loc):
+                if epoch == 1:
+                    shutil.rmtree(sav_loc)
+                    os.mkdir(sav_loc)
+            else:
+                os.mkdir(sav_loc)
+            t.save(model.state_dict(), os.path.join(sav_loc, f'model-{epoch}.pt'))
+        
+        print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')

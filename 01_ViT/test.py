@@ -11,3 +11,11 @@ y = model(x)
 # %%
 y.shape
 # %%
+import utils
+# %%
+trian, test = utils.get_loaders(32)
+# %%
+len(trian)
+# %%
+next(iter(trian))[1]
+# %%
