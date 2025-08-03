@@ -1,8 +1,5 @@
 import torch as t
 
-import matplotlib.pyplot as plt
-import json
-import utils
 import configurations
 
 info = configurations.config()
@@ -20,7 +17,8 @@ class TransformerEncoder(t.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.layer_norm1 = t.nn.LayerNorm(info.embedding_dim)
-        self.MHA = t.nn.MultiheadAttention(embed_dim=info.embedding_dim, num_heads=info.attention_head)
+        self.MHA = t.nn.MultiheadAttention(embed_dim=info.embedding_dim, 
+                                            num_heads=info.attention_head, batch_first=True)
         self.layer_norm2 = t.nn.LayerNorm(info.embedding_dim)
         self.mlp = t.nn.Sequential(
             t.nn.Linear(info.embedding_dim, info.mlp_nodes),

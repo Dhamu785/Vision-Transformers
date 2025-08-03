@@ -2,7 +2,9 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torch as t
 import torchvision as tv
-from typing import Tuple, List
+
+import matplotlib.pyplot as plt
+from typing import Tuple, List, Callable
 from tqdm import tqdm
 import os
 import shutil
@@ -49,7 +51,7 @@ class model_utils:
             running_loss = 0
             running_acc = 0
             model.train()
-            bar_train = tqdm(self.train_len, desc="Batch trained", unit="batchs", colour="GREEN")
+            bar_train = tqdm(range(self.train_len), desc="Batch trained", unit="batchs", colour="GREEN")
 
             for x, y in self.train_data:
                 x = x.to(self.device)
@@ -81,7 +83,7 @@ class model_utils:
             train_acc.append(running_acc/self.train_len)
             train_loss.append(running_loss/self.train_len)
 
-            bar_val = tqdm(self.val_len, desc='Validation', unit='batches', colour='RED')
+            bar_val = tqdm(range(self.val_len), desc='Validation', unit='batches', colour='RED')
             model.eval()
             running_val_acc = 0
             running_val_loss = 0
@@ -111,3 +113,15 @@ class model_utils:
             t.save(model.state_dict(), os.path.join(sav_loc, f'model-{epoch}.pt'))
         
             print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')
+
+
+    
+def plot_data(data):
+    x,y = data[0], data[1]
+    plt.figure(figsize=(10,8))
+    for i in range(1, 16):
+        plt.subplot(5,5,i)
+        plt.imshow(x[i][0].numpy(), cmap='gray')
+        plt.title(y[i].item())
+        plt.axis('off')
+    plt.show()
