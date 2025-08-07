@@ -42,7 +42,7 @@ class model_utils:
         score = (predictions == y).float().mean()
         return score
     
-    def train_model(self, model:t.nn.Module) -> Tuple[List,List,List,List]:
+    def train_model(self, model:t.nn.Module) -> Tuple[List[float],List[float],List[float],List[float]]:
         model.to(device=self.device)
         train_loss = []
         train_acc = []
@@ -117,7 +117,7 @@ class model_utils:
         
             print(f'{epoch}/{self.epochs} | train: loss = {train_loss[-1]:.4f}, acc = {train_acc[-1]:.4f} | val: loss = {val_loss[-1]:.4f}, acc = {val_acc[-1]:.4f}')
 
-
+        return train_loss, train_acc, val_loss, val_acc
     
 def plot_data(data):
     x,y = data[0], data[1]
