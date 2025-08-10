@@ -15,3 +15,21 @@ class mha(nn.Module):
         self.att_d = nn.Dropout(att_drop)
         self.proj = nn.Linear(dim, dim)
         self.proj_d = nn.Dropout(proj_drop)
+
+    def forward(self, x: t.Tensor) -> t.Tensor:
+        n_sample, patches, dim = x.shape
+        if dim != self.dim:
+            raise ValueError
+
+        qkv: t.Tensor = self.qkv(x) # n_samples, patches, 3*dim
+        qkv: t.Tensor = qkv.reshape(n_sample, patches, 3, self.num_heads, self.head_dim)
+        qkv: t.Tensor = qkv.permute(2, 0, 3, 1, 4) # qkv, n_samples, num_heads, patches, head_dim
+        q, k, v = qkv[0], qkv[1], qkv[2]
+        weights: t.Tensor = q @ k.transpose(1,2) # n_samples, num_heads, num_patches, num_patches
+        droped_weights: t.Tensor = self.att_d(weights.softmax(-1))
+        weighted_value: t.Tensor = droped_weights @ v # n_samples, num_heads, num_patches, head_dim
+        v_t: t.Tensor = weighted_value.transpose(1,2) # n_samples, num_patches, num_heads, head_dim
+        v_flatten: t.Tensor = v_t.flatten(2) # n_samples, num_patches, dimension
+        final_proj: t.Tensor = self.proj_d(self.proj(v_flatten))
+
+        return x
