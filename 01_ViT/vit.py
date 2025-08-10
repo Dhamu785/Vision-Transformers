@@ -18,10 +18,10 @@ class TransformerEncoder(t.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.layer_norm1 = t.nn.LayerNorm(info.embedding_dim)
-        self.MHA = t.nn.MultiheadAttention(embed_dim=info.embedding_dim, 
-                                            num_heads=info.attention_head, batch_first=True)
-        # self.MHA = mha(dim=info.embedding_dim, num_heads=info.attention_head, qkv_bias=True,
-        #                 att_drop=0.3, proj_drop=0.2)
+        # self.MHA = t.nn.MultiheadAttention(embed_dim=info.embedding_dim, 
+        #                                     num_heads=info.attention_head, batch_first=True)
+        self.MHA = mha(dim=info.embedding_dim, num_heads=info.attention_head, qkv_bias=True,
+                        att_drop=0.0, proj_drop=0.0)
         self.layer_norm2 = t.nn.LayerNorm(info.embedding_dim)
         self.mlp = t.nn.Sequential(
             t.nn.Linear(info.embedding_dim, info.mlp_nodes),
@@ -31,8 +31,8 @@ class TransformerEncoder(t.nn.Module):
 
     def forward(self, x:t.Tensor) -> t.Tensor:
         res1 = x
-        x = self.MHA(self.layer_norm1(x), self.layer_norm1(x), self.layer_norm1(x))[0] + res1
-        # x = self.MHA(self.layer_norm1(x)) + res1
+        # x = self.MHA(self.layer_norm1(x), self.layer_norm1(x), self.layer_norm1(x))[0] + res1
+        x = self.MHA(self.layer_norm1(x)) + res1
         res2 = x
         x = self.mlp(self.layer_norm2(x)) + res2
         return x

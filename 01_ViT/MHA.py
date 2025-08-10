@@ -26,14 +26,14 @@ class mha(nn.Module):
         qkv: t.Tensor = qkv.reshape(n_sample, patches, 3, self.num_heads, self.head_dim)
         qkv: t.Tensor = qkv.permute(2, 0, 3, 1, 4) # qkv, n_samples, num_heads, patches, head_dim
         q, k, v = qkv[0], qkv[1], qkv[2]
-        weights: t.Tensor = q @ k.transpose(-2,-1) # n_samples, num_heads, num_patches, num_patches
-        droped_weights: t.Tensor = self.att_d(weights.softmax(-1))
+        weights: t.Tensor = (q @ k.transpose(-2,-1))  * self.scale # n_samples, num_heads, num_patches, num_patches
+        droped_weights: t.Tensor = self.att_d(weights.softmax(dim=-1))
         weighted_value: t.Tensor = droped_weights @ v # n_samples, num_heads, num_patches, head_dim
         v_t: t.Tensor = weighted_value.transpose(1,2) # n_samples, num_patches, num_heads, head_dim
         v_flatten: t.Tensor = v_t.flatten(2) # n_samples, num_patches, dimension
         final_proj: t.Tensor = self.proj_d(self.proj(v_flatten))
 
-        return x
+        return final_proj
 
 # %%
 
