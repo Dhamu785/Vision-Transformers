@@ -2,6 +2,7 @@
 import torch as t
 import torch.nn as nn
 
+# https://github.com/jankrepl/mildlyoverfitted/blob/master/github_adventures/vision_transformer/custom.py
 class mha(nn.Module):
     def __init__(self, dim: int, num_heads: int, 
                     qkv_bias: bool, att_drop: float, 
