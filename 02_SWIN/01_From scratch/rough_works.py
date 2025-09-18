@@ -76,4 +76,16 @@ def get_relative_distances(window_size):
 # %%
 distance = get_relative_distances(3)
 print(distance)
+# %% Unfold ==================================
+import torch as t
+# %%
+x = t.randn(8,1,80,80)
+# %%
+unfold = t.nn.Unfold(kernel_size=2, padding=0, stride=2)
+un = unfold(x)
+print(un.shape)
+# %%
+y = un.view(8, -1, 40, 40).permute(0, 2, 3, 1)
+# %%
+y.shape
 # %%
