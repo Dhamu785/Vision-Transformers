@@ -81,7 +81,7 @@ distance = get_relative_distances(7)+6
 print(distance)
 print(distance.shape)
 # %%
-print(distance[40])
+print(distance.min(), distance.max())
 # %% Unfold ==================================
 import torch as t
 # %%
