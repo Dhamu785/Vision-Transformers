@@ -1,9 +1,9 @@
 # %%
 import torch as t
 # %%
-window_size = 7
+window_size = 4
 shift = window_size // 2
-img_h, img_w = 14, 14
+img_h, img_w = 8, 8
 # %%
 img_mask = t.zeros((img_h, img_w))
 print(img_mask.shape)
@@ -25,3 +25,20 @@ print(img_mask)
 # %%
 print(img_mask.shape)
 # %%
+mask_windows = img_mask.view(img_h // window_size, window_size, img_w // window_size, window_size)
+print(mask_windows.shape)
+print(mask_windows)
+# %%
+mask_windows = mask_windows.permute(0, 2, 1, 3).contiguous().view(-1,window_size * window_size)
+print(mask_windows)
+# %%
+attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
+print(attn_mask)
+# %%
+attn_mask[1]
+# %%
+a = t.tensor([[[1,2,3,4]],[[5,6,7,8]]])
+b = t.tensor([[1,2,3,4],[5,6,7,8]])
+c = a-b.unsqueeze(2)
+print(c.shape)
+print(c)
