@@ -3,7 +3,7 @@ import torch as t
 # %% Rolling definition 
 a = t.tensor([[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]])
 print("Shape = ", a.shape)
-print("Array = ",a)
+print(a)
 # %% Rolling implementation
 rolled1 = t.roll(a, shifts=(2,2), dims=(0,1))
 rolled2 = t.roll(rolled1, shifts=(-2,-2), dims=(0,1))
@@ -12,16 +12,31 @@ print(rolled1)
 print(rolled2)
 # %% Mask analysis==================================
 import torch as t
+from einops import rearrange
 # %%
-mask = t.zeros((6,6))
+window_size = 3
+mask = t.zeros((window_size**2, window_size**2))
 mask.shape, mask
 # %%
 displacement = 1
-window_size = 3
-mask[-displacement * window_size:, :-displacement * window_size] = float('-inf')
+mask[-displacement * window_size:, :-displacement * window_size] = float('-inf') # mask[-3:, :-3]
 print(mask)
 mask[:-displacement * window_size, -displacement * window_size:] = float('-inf')
 print(mask)
+
+# %% Rearrange mask=======
+window_size = 3
+displacement = 1
+mask = t.zeros((window_size**2, window_size**2))
+mask.shape, mask
+
+# %%
+mask = rearrange(mask, '(h1 w1) (h2 w2) -> h1 w1 h2 w2', h1=window_size, h2=window_size)
+mask[:, -displacement:, :, :-displacement] = float('-inf')
+mask[:, :-displacement, :, -displacement:] = float('-inf')
+mask = rearrange(mask, 'h1 w1 h2 w2 -> (h1 w1) (h2 w2)')
+print(mask)
+print(mask.shape)
 # %%
 import torch
 
