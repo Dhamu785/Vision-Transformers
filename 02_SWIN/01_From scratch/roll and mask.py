@@ -35,10 +35,4 @@ print(mask_windows)
 attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
 print(attn_mask)
 # %%
-attn_mask[1]
-# %%
-a = t.tensor([[[1,2,3,4]],[[5,6,7,8]]])
-b = t.tensor([[1,2,3,4],[5,6,7,8]])
-c = a-b.unsqueeze(2)
-print(c.shape)
-print(c)
+attn_mask[0]
