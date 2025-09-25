@@ -17,3 +17,4 @@ class PatchMerge(nn.Module):
         new_h, new_w = h//self.downscaling_factor, w//self.downscaling_factor
         x = self.patch_merge(x).view(b, -1, new_h, new_w).permute(0, 2, 3, 1)
         x = self.linear(x)
+        return x
