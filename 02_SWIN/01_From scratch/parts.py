@@ -15,5 +15,5 @@ class PatchMerge(nn.Module):
     def forward(self, x: t.Tensor) -> t.Tensor:
         b, c, h, w = x.shape
         new_h, new_w = h//self.downscaling_factor, w//self.downscaling_factor
-        x = self.patch_merge(x).view(b, self.downscaling_factor, new_h, new_w).permute(0, 2, 3, 1)
+        x = self.patch_merge(x).view(b, -1, new_h, new_w).permute(0, 2, 3, 1)
         x = self.linear(x)

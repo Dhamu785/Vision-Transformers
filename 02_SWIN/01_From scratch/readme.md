@@ -44,4 +44,5 @@
 #### 01. Patch_Merging
 - `params : ` in_channel=3, out_channels=96, downscaling_factor=4
 - `Input shape : ` (B, C, H, W)
+    - `unfold shape =` (B, C*(downscaling_factor**2), H/4 * W/4) -> (Batch, channels, total_patches)
 - `Output shape : ` (B, H/4, W/4, C)

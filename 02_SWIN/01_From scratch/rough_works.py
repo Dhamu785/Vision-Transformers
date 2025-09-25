@@ -101,12 +101,17 @@ print(distance.min(), distance.max())
 import torch as t
 # %%
 x = t.randn(8,3,224,224)
+# x = t.tensor([[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]], dtype=t.float32)
+downscaling_factor = 4
+print(x.shape)
 # %%
-unfold = t.nn.Unfold(kernel_size=4, padding=0, stride=4)
+unfold = t.nn.Unfold(kernel_size=downscaling_factor, padding=0, stride=downscaling_factor)
 un = unfold(x)
 print(un.shape)
+# print(un)
 # %%
 y = un.view(8, -1, 56, 56).permute(0, 2, 3, 1)
+print(y)
 # %%
 y.shape
 # %%
