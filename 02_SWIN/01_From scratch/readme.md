@@ -28,7 +28,7 @@
             - dim = 96
             - heads = 3
             - head_dim = 32
-            - ml_dim = 96(hidde_dimensions) * 4
+            - mlp_dim = 96(hidde_dimensions) * 4
             - shifted = True / False
             - window_size = 7
             - relative_pos_embedding = True
@@ -40,4 +40,8 @@
                 - window_size = 7
                 - relative_pos_embedding = True
 
-
+### **02. Input / Output shapes**
+#### 01. Patch_Merging
+- `params : ` in_channel=3, out_channels=96, downscaling_factor=4
+- `Input shape : ` (B, C, H, W)
+- `Output shape : ` (B, H/4, W/4, C)
