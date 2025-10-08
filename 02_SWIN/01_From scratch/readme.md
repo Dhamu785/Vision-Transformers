@@ -42,7 +42,10 @@
 
 ### **02. Input / Output shapes**
 #### 01. Patch_Merging
-- `params : ` in_channel=3, out_channels=96, downscaling_factor=4
-- `Input shape : ` (B, C, H, W)
+- `params :` in_channel=3, out_channels=96, downscaling_factor=4
+- `Input shape :` (B, C, H, W)
     - `unfold shape =` (B, C*(downscaling_factor**2), H/4 * W/4) -> (Batch, channels, total_patches)
-- `Output shape : ` (B, H/4, W/4, C)
+- `Output shape :` (B, H/4, W/4, C)
+#### 02. Window attention
+- `params :` dim=96, heads=3, head_dim=32, shifted=True/False, window_size=7, relative_pos_embedding=True
+- Input shape :` (B, H/4, w/4, C) => (8, H/4, W/4, 96)
