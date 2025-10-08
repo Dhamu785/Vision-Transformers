@@ -18,3 +18,7 @@ class PatchMerge(nn.Module):
         x = self.patch_merge(x).view(b, -1, new_h, new_w).permute(0, 2, 3, 1)
         x = self.linear(x)
         return x
+
+class WindowAttention(nn.Module):
+    def __init__(self, dim: int, head_dim: int, shifted: int, window_size: int, rel_pos: bool):
+        super().__init__()
