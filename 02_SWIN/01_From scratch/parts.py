@@ -1,6 +1,7 @@
 import torch as t
 from torch import nn
 from typing import Tuple
+from einops import rearrange, einsum
 
 class PatchMerge(nn.Module):
     '''
@@ -15,7 +16,7 @@ class PatchMerge(nn.Module):
 
     def forward(self, x: t.Tensor) -> t.Tensor:
         b, c, h, w = x.shape
-        new_h, new_w = h//self.downscaling_factor, w//self.downscaling_factor
+        new_h, new_w = h // self.downscaling_factor, w // self.downscaling_factor
         x = self.patch_merge(x).view(b, -1, new_h, new_w).permute(0, 2, 3, 1)
         x = self.linear(x)
         return x
@@ -36,10 +37,26 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
     return att_mask
 
 class WindowAttention(nn.Module):
-    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, window_size: int, rel_pos: bool):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool, device: str):
         super().__init__()
         inner_dim = heads * head_dim
         self.scale = head_dim ** -0.5
         self.shifted = shifted
         self.window_size = window_size
         self.rel_pos = rel_pos
+        self.shift = shift
+        if shifted:
+            mask = get_mask(img_resolution=(512, 512), window_size=window_size, shift=shift, device=device)
+            self.register_buffer("attention mask", mask)
+        if rel_pos:
+            ...
+        else:
+            ...
+        self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
+
+    def forward(self, x: t.Tensor) -> t.Tensor:
+        if self.shifted:
+            x = t.roll(x, shifts=(-self.shift, -self.shift), dims=(1,2))
+
+        qkv = self.qkv(x).chunk(3, dim=-1)
+        
