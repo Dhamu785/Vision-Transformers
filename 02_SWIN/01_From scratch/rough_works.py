@@ -1,16 +1,3 @@
-# %% Rollings imports==============================
-import torch as t
-# %% Rolling definition 
-a = t.arange(0, 64).reshape(1,8,8)
-print("Shape = ", a.shape)
-print(a)
-# %% Rolling implementation
-rolled1 = t.roll(a, shifts=(4,4), dims=(1,2))
-rolled2 = t.roll(a, shifts=(-4,-4), dims=(1,2))
-
-print(rolled1)
-print(rolled2)
-
 # %% Relative distance==================================
 import torch as t
 import numpy as np

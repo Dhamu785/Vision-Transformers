@@ -1,3 +1,16 @@
+# %%
+import torch as t
+# %% Rolling definition 
+a = t.arange(0, 64).reshape(1,8,8)
+print("Shape = ", a.shape)
+print(a)
+# %% Rolling implementation
+shift = 2
+rolled1 = t.roll(a, shifts=(shift,shift), dims=(1,2))
+rolled2 = t.roll(a, shifts=(-shift,-shift), dims=(1,2))
+
+print(rolled1)
+print(rolled2)
 # %% imports
 import torch as t
 # %% Mask for shifted window ====================================
@@ -14,6 +27,7 @@ def window_partition(x, window_size: int):
                         where windows are stacked in the batch dimension.
     """
     B, H, W, C = x.shape
+    print(x.shape)
     # Reshape the tensor to group pixels into windows: (B, H/ws, ws, W/ws, ws, C)
     x = x.view(B, H // window_size, window_size, W // window_size, window_size, C)
     # Permute to bring window dimensions together: (B, H/ws, W/ws, ws, ws, C)
@@ -60,6 +74,8 @@ def create_swin_attention_mask(input_resolution, window_size, shift_size, device
             cnt += 1
 
     # 2. Partition the image mask into windows.
+    print(img_mask.shape)
+    print(img_mask.squeeze())
     mask_windows = window_partition(img_mask, window_size)
     mask_windows = mask_windows.view(-1, window_size * window_size)
 
@@ -71,6 +87,6 @@ def create_swin_attention_mask(input_resolution, window_size, shift_size, device
     
     return attn_mask
 # %%
-mask = create_swin_attention_mask((8,8), 4, 2, 'cpu')
+mask = create_swin_attention_mask(input_resolution=(8,8), window_size=4, shift_size=2, device='cpu')
 # print(mask[0])
 print(mask[0])

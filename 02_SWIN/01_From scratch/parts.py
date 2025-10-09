@@ -1,5 +1,6 @@
 import torch as t
 from torch import nn
+from typing import Tuple
 
 class PatchMerge(nn.Module):
     '''
@@ -19,6 +20,13 @@ class PatchMerge(nn.Module):
         x = self.linear(x)
         return x
 
+def create_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, device: str):
+    ...
 class WindowAttention(nn.Module):
-    def __init__(self, dim: int, head_dim: int, shifted: int, window_size: int, rel_pos: bool):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, window_size: int, rel_pos: bool):
         super().__init__()
+        inner_dim = heads * head_dim
+        self.scale = head_dim ** -0.5
+        self.shifted = shifted
+        self.window_size = window_size
+        self.rel_pos = rel_pos
