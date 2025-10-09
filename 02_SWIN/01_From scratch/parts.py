@@ -2,6 +2,7 @@ import torch as t
 from torch import nn
 from typing import Tuple
 from einops import rearrange, einsum
+import numpy as np
 
 class PatchMerge(nn.Module):
     '''
@@ -45,13 +46,17 @@ class WindowAttention(nn.Module):
         self.window_size = window_size
         self.rel_pos = rel_pos
         self.shift = shift
+        self.heads = heads
         if shifted:
             mask = get_mask(img_resolution=(512, 512), window_size=window_size, shift=shift, device=device)
             self.register_buffer("attention mask", mask)
         if rel_pos:
-            ...
+            indices = t.from_numpy(np.array([x, y] for x in range(self.window_size) for y in range(self.window_size)))
+            self.distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
+            self.ref_tab = nn.Parameter(t.randn(2 * window_size -1, t.randn(2 * window_size - 1)))
         else:
-            ...
+            self.ref_tab = nn.Parameter(t.randn(window_size**2, window_size**2))
+            
         self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
 
     def forward(self, x: t.Tensor) -> t.Tensor:
@@ -59,4 +64,6 @@ class WindowAttention(nn.Module):
             x = t.roll(x, shifts=(-self.shift, -self.shift), dims=(1,2))
 
         qkv = self.qkv(x).chunk(3, dim=-1)
-        
+        q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
+                                            h=self.heads, wh=self.window_size, ww=self.window_size), qkv)
+        qk = einsum(q, k, 'b h w1 d, b h w2 d -> b h w1 w2') * self.scale
