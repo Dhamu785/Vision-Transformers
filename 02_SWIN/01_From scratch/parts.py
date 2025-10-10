@@ -48,6 +48,7 @@ class WindowAttention(nn.Module):
         self.rel_pos = rel_pos
         self.shift = shift
         self.heads = heads
+        self.dim = dim
         if shifted:
             mask = get_mask(img_resolution=(512, 512), window_size=window_size, shift=shift, device=device)
             mask_to_qk = mask.repeat(Config.batch_size, 1, 1).unsqueeze(1)
@@ -61,15 +62,18 @@ class WindowAttention(nn.Module):
             
         self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
         self.norm = nn.Softmax(dim=-1)
+        self.to_out = nn.Linear(in_features=inner_dim, out_features=dim)
 
     def forward(self, x: t.Tensor) -> t.Tensor:
+        b, h, w, d = x.shape
+        nh, nw = h // self.window_size, w // self.window_size
         if self.shifted:
             x = t.roll(x, shifts=(-self.shift, -self.shift), dims=(1,2))
 
         qkv = self.qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
                                             h=self.heads, wh=self.window_size, ww=self.window_size), qkv)
-        qk = einsum(q, k, 'b h w1 d, b h w2 d -> b h w1 w2') * self.scale
+        qk = einsum('b h w1 d, b h w2 d -> b h w1 w2', q, k) * self.scale
 
         if self.rel_pos:
             qk += self.ref_tab[self.abs_distance[:,:,0], self.abs_distance[:,:,1]]
@@ -78,4 +82,11 @@ class WindowAttention(nn.Module):
 
         if self.shifted:
             qk += self.mask_to_qk 
-        qk_norm = self.noem(qk)
+        qk_norm = self.norm(qk)
+        qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
+        reverse = rearrange(qk_v, '(b nh nw) h w d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=d)
+        reverse = self.to_out(reverse)
+
+        if self.shifted:
+            reverse = t.roll(reverse, shifts=(self.shift, self.shift), dim=(1,2))
+        return reverse
