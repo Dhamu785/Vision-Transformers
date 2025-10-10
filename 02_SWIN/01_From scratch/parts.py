@@ -35,7 +35,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
     mask_ids = mask.view(H // window_size, window_size, W // window_size, window_size).permute(0, 2, 1, 3).contiguous().view(-1, window_size * window_size)
     att_res = mask_ids.unsqueeze(1) - mask_ids.unsqueeze(2)
     att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float(-100.0))
-    return att_mask
+    return att_mask # no. of windows, window size ** 2
 
 class WindowAttention(nn.Module):
     def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool, device: str):
@@ -52,7 +52,7 @@ class WindowAttention(nn.Module):
             self.register_buffer("attention mask", mask)
         if rel_pos:
             indices = t.from_numpy(np.array([x, y] for x in range(self.window_size) for y in range(self.window_size)))
-            self.distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
+            self.abs_distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
             self.ref_tab = nn.Parameter(t.randn(2 * window_size -1, t.randn(2 * window_size - 1)))
         else:
             self.ref_tab = nn.Parameter(t.randn(window_size**2, window_size**2))
@@ -67,3 +67,11 @@ class WindowAttention(nn.Module):
         q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
                                             h=self.heads, wh=self.window_size, ww=self.window_size), qkv)
         qk = einsum(q, k, 'b h w1 d, b h w2 d -> b h w1 w2') * self.scale
+
+        if self.rel_pos:
+            qk += self.ref_tab[self.abs_distance[:,:,0], self.abs_distance[:,:,1]]
+        else:
+            qk += self.ref_tab
+
+        if self.shifted:
+            ...
