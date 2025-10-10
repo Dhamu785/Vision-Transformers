@@ -85,7 +85,8 @@ class WindowAttention(nn.Module):
             qk += self.mask_to_qk 
         qk_norm = self.norm(qk)
         qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
-        reverse = rearrange(qk_v, '(b nh nw) h w d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=self.head_dim)
+        reverse = rearrange(qk_v, '(b nh nw) h w1 d -> b (nh w) (nw w) (h d)', 
+                            b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=self.head_dim, w1=self.window_size**2)
         reverse = self.to_out(reverse)
 
         if self.shifted:
