@@ -74,6 +74,9 @@ class WindowAttention(nn.Module):
         nh, nw = h // self.window_size, w // self.window_size
         if self.shifted:
             x = t.roll(x, shifts=(-self.shift, -self.shift), dims=(1,2))
+            current_res = (h, w)
+            if self.attention_mask is None or current_res != self.input_resolution:
+                mask = get_mask(current_res, self.window_size, self.shift, x.device)
 
         qkv = self.qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
