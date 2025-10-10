@@ -2,17 +2,11 @@
 import torch as t
 import numpy as np
 # %%
-def get_relative_distances(window_size):
-    indices = t.tensor(np.array([[x, y] for x in range(window_size) for y in range(window_size)]))
-    # print(indices)
-    distances = indices[None, :, :] - indices[:, None, :]
-    return distances
-# %%
-distance = get_relative_distances(7)+6
-print(distance)
-print(distance.shape)
-# %%
-print(distance.min(), distance.max())
+window_size = 7
+indices = t.from_numpy(np.array([[x, y] for x in range(window_size) for y in range(window_size)]))
+distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
+# print(abs_distance)
+print("Minimum value = ", distance.min().item(), "Maximum value = ", distance.max().item(), "Shape = ", distance.shape)
 # %% Unfold ==================================
 import torch as t
 # %%
