@@ -8,7 +8,7 @@ distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
 # print(abs_distance)
 print("Minimum value = ", distance.min().item(), "Maximum value = ", distance.max().item(), "Shape = ", distance.shape)
 
-# %% relative position improved
+# %% relative position improved =====================================
 import torch as t
 # %%
 window_size = 7
@@ -19,6 +19,17 @@ rel_coo1 = rel_coo + window_size - 1
 rel_coo1[:,:,0]*=13
 rel_coo3 = rel_coo1.sum(-1)
 print(rel_coo3.shape)
+# %% testing of relative position ====================
+import torch as t
+
+window_size = 7
+coo = t.flatten(t.stack(t.meshgrid([t.arange(window_size), t.arange(window_size)], indexing='ij')), 1)
+coo_ij = (coo[:,:,None] - coo[:,None,:]).permute(1,2,0).contiguous()
+coo_ij += window_size-1
+coo_ij[:,:,0] *= 2*window_size-1
+rel_1d = coo_ij.sum(-1)
+print(rel_1d.shape)
+print(rel_1d.unique())
 # %% Unfold ==================================
 import torch as t
 # %%

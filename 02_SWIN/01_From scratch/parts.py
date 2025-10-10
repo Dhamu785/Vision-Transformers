@@ -39,7 +39,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
     return att_mask # no. of windows, window size ** 2, window size ** 2
 
 class WindowAttention(nn.Module):
-    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool, device: str):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool):
         super().__init__()
         inner_dim = heads * head_dim
         self.head_dim = head_dim
@@ -50,17 +50,21 @@ class WindowAttention(nn.Module):
         self.shift = shift
         self.heads = heads
         self.dim = dim
-        if shifted:
-            mask = get_mask(img_resolution=(512, 512), window_size=window_size, shift=shift, device=device)
-            mask_to_qk = mask.repeat(Config.batch_size, 1, 1).unsqueeze(1)
-            self.register_buffer("attention mask", mask_to_qk)
+
         if rel_pos:
-            indices = t.from_numpy(np.array([x, y] for x in range(self.window_size) for y in range(self.window_size)))
-            self.abs_distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
-            self.ref_tab = nn.Parameter(t.randn(2 * window_size -1, 2 * window_size - 1))
+            coo = t.flatten(t.stack(t.meshgrid([t.arange(window_size), t.arange(window_size)], indexing='ij')), 1)
+            coo_ij = (coo[:,:,None] - coo[:,None,:]).permute(1,2,0).contiguous()
+            coo_ij += window_size-1
+            coo_ij[:,:,0] *= 2*window_size-1
+            rel_1d = coo_ij.sum(-1)
+            self.register_buffer("rel_pos_1D", rel_1d)
+            self.ref_tab = nn.Parameter(t.randn((2*window_size-1) * (2*window_size-1), heads))
         else:
             self.ref_tab = nn.Parameter(t.randn(window_size**2, window_size**2))
-            
+
+        self.register_buffer("attention_mask", None)
+        self.register_buffer("input_resolution", None)
+
         self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
         self.norm = nn.Softmax(dim=-1)
         self.to_out = nn.Linear(in_features=inner_dim, out_features=dim)
