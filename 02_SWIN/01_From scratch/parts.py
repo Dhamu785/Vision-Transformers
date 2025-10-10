@@ -3,6 +3,7 @@ from torch import nn
 from typing import Tuple
 from einops import rearrange, einsum
 import numpy as np
+from config import Config
 
 class PatchMerge(nn.Module):
     '''
