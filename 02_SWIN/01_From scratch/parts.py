@@ -42,6 +42,7 @@ class WindowAttention(nn.Module):
     def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool, device: str):
         super().__init__()
         inner_dim = heads * head_dim
+        self.head_dim = head_dim
         self.scale = head_dim ** -0.5
         self.shifted = shifted
         self.window_size = window_size
@@ -84,7 +85,7 @@ class WindowAttention(nn.Module):
             qk += self.mask_to_qk 
         qk_norm = self.norm(qk)
         qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
-        reverse = rearrange(qk_v, '(b nh nw) h w d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=d)
+        reverse = rearrange(qk_v, '(b nh nw) h w d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=self.head_dim)
         reverse = self.to_out(reverse)
 
         if self.shifted:
