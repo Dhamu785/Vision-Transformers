@@ -57,7 +57,7 @@ class WindowAttention(nn.Module):
         if rel_pos:
             indices = t.from_numpy(np.array([x, y] for x in range(self.window_size) for y in range(self.window_size)))
             self.abs_distance = (indices[None, :, :] - indices[:, None, :]) + (window_size-1)
-            self.ref_tab = nn.Parameter(t.randn(2 * window_size -1, t.randn(2 * window_size - 1)))
+            self.ref_tab = nn.Parameter(t.randn(2 * window_size -1, 2 * window_size - 1))
         else:
             self.ref_tab = nn.Parameter(t.randn(window_size**2, window_size**2))
             
