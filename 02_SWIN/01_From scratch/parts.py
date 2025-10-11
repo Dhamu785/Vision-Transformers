@@ -33,7 +33,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
         for w in w_slice:
             mask[h,w] = count
             count += 1
-    mask_ids = mask.view(H // window_size, window_size, W // window_size, window_size).permute(0, 2, 1, 3).contiguous().view(-1, window_size * window_size)
+    mask_ids = rearrange(mask, "(nh wh) (nw ww) -> (nh nw) (wh ww)", wh=window_size, ww=window_size).contiguous()
     att_res = mask_ids.unsqueeze(1) - mask_ids.unsqueeze(2)
     att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float(-100.0))
     return att_mask # no. of windows, window size ** 2, window size ** 2
