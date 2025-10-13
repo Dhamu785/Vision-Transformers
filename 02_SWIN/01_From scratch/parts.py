@@ -77,16 +77,20 @@ class WindowAttention(nn.Module):
             current_res = (h, w)
             if self.attention_mask is None or current_res != self.input_resolution:
                 mask = get_mask(current_res, self.window_size, self.shift, x.device)
+                self.attention_mask = mask
+                self.input_resolution = current_res
 
         qkv = self.qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
                                             h=self.heads, wh=self.window_size, ww=self.window_size), qkv)
-        qk = einsum('b h w1 d, b h w2 d -> b h w1 w2', q, k) * self.scale
+        qk = einsum('b h w d, b h w d -> b h w w', q, k) * self.scale
 
         if self.rel_pos:
-            qk += self.ref_tab[self.abs_distance[:,:,0], self.abs_distance[:,:,1]]
+            rel_pos_emb = self.ref_tab[self.rel_pos_1D.view(-1)].view(self.window_size**2, self.window_size**2, self.heads)
+            rel_pos_emb = rel_pos_emb.permute(2, 0, 1).contiguous()
+            qk += rel_pos_emb.unsqueeze(0)
         else:
-            qk += self.ref_tab
+            qk += self.ref_tab.unsqueeze(0).unsqueeze(0)
 
         if self.shifted:
             qk += self.mask_to_qk 
