@@ -35,7 +35,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
             count += 1
     mask_ids = rearrange(mask, "(nh wh) (nw ww) -> (nh nw) (wh ww)", wh=window_size, ww=window_size).contiguous()
     att_res = mask_ids.unsqueeze(1) - mask_ids.unsqueeze(2)
-    att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float('-inf'))
+    att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float(-100))
     return att_mask # no. of windows, window size ** 2, window size ** 2
 
 class WindowAttention(nn.Module):
@@ -77,12 +77,12 @@ class WindowAttention(nn.Module):
             if self.attention_mask is None or current_res != self.input_resolution:
                 mask = get_mask(current_res, self.window_size, self.shift, x.device)
                 self.attention_mask = mask # no. of windows, window size ** 2, window size ** 2
-                self.input_resolution = current_res
+                self.input_resolution = t.tensor(current_res)
 
         qkv = self.qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t,'B (h1 wh) (w1 ww) (h d) -> (B h1 w1) h (wh ww) d',
                                             h=self.heads, wh=self.window_size, ww=self.window_size), qkv)
-        qk = einsum('b h w d, b h w d -> b h w w', q, k) * self.scale
+        qk = einsum(q, k, 'b h i d, b h j d -> b h i j') * self.scale
 
         if self.rel_pos:
             rel_pos_emb = self.ref_tab[self.rel_pos_1D.view(-1)].view(self.window_size**2, self.window_size**2, self.heads)
@@ -95,11 +95,12 @@ class WindowAttention(nn.Module):
             qk += self.attention_mask.repeat(b, 1, 1).unsqueeze(1)
 
         qk_norm = nn.functional.softmax(qk, dim=-1)
-        qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
-        reverse = rearrange(qk_v, '(b nh nw) h (w w) d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size)
+        qk_v = einsum(qk_norm, v, 'b h w w, b h w d -> b h w d')
+        reverse = rearrange(qk_v, '(b nh nw) h (wh ww) d -> b (nh wh) (nw ww) (h d)', nh=nh, nw=nw, 
+                            wh=self.window_size, ww=self.window_size)
         reverse = self.to_out(reverse)
 
         if self.shifted:
-            reverse = t.roll(reverse, shifts=(self.shift, self.shift), dim=(1,2))
+            reverse = t.roll(reverse, shifts=(self.shift, self.shift), dims=(1,2))
 
         return reverse
