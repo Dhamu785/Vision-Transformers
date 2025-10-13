@@ -66,7 +66,6 @@ class WindowAttention(nn.Module):
         self.register_buffer("input_resolution", None)
 
         self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
-        self.norm = nn.Softmax(dim=-1)
         self.to_out = nn.Linear(in_features=inner_dim, out_features=dim)
 
     def forward(self, x: t.Tensor) -> t.Tensor:
@@ -95,7 +94,7 @@ class WindowAttention(nn.Module):
         if self.shifted:
             qk += self.attention_mask.repeat(b, 1, 1).unsqueeze(1)
 
-        qk_norm = self.norm(qk)
+        qk_norm = nn.functional.softmax(qk, dim=-1)
         qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
         reverse = rearrange(qk_v, '(b nh nw) h (w w) d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size)
         reverse = self.to_out(reverse)
