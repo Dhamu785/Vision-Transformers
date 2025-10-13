@@ -35,7 +35,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
             count += 1
     mask_ids = rearrange(mask, "(nh wh) (nw ww) -> (nh nw) (wh ww)", wh=window_size, ww=window_size).contiguous()
     att_res = mask_ids.unsqueeze(1) - mask_ids.unsqueeze(2)
-    att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float(-100.0))
+    att_mask = att_res.masked_fill(att_res == 0, float(0.0)).masked_fill(att_res != 0, float('-inf'))
     return att_mask # no. of windows, window size ** 2, window size ** 2
 
 class WindowAttention(nn.Module):
@@ -77,7 +77,7 @@ class WindowAttention(nn.Module):
             current_res = (h, w)
             if self.attention_mask is None or current_res != self.input_resolution:
                 mask = get_mask(current_res, self.window_size, self.shift, x.device)
-                self.attention_mask = mask
+                self.attention_mask = mask # no. of windows, window size ** 2, window size ** 2
                 self.input_resolution = current_res
 
         qkv = self.qkv(x).chunk(3, dim=-1)
@@ -93,13 +93,14 @@ class WindowAttention(nn.Module):
             qk += self.ref_tab.unsqueeze(0).unsqueeze(0)
 
         if self.shifted:
-            qk += self.mask_to_qk 
+            qk += self.attention_mask.repeat(b, 1, 1).unsqueeze(1)
+
         qk_norm = self.norm(qk)
         qk_v = einsum('b h w w, b h w d -> b h w d', qk_norm, v)
-        reverse = rearrange(qk_v, '(b nh nw) h w1 d -> b (nh w) (nw w) (h d)', 
-                            b=b, nh=nh, nw=nw, w=self.window_size, h=self.heads, d=self.head_dim, w1=self.window_size**2)
+        reverse = rearrange(qk_v, '(b nh nw) h (w w) d -> b (nh w) (nw w) (h d)', b=b, nh=nh, nw=nw, w=self.window_size)
         reverse = self.to_out(reverse)
 
         if self.shifted:
             reverse = t.roll(reverse, shifts=(self.shift, self.shift), dim=(1,2))
+
         return reverse
