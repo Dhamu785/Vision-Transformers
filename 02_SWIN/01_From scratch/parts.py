@@ -104,3 +104,21 @@ class WindowAttention(nn.Module):
             reverse = t.roll(reverse, shifts=(self.shift, self.shift), dims=(1,2))
 
         return reverse
+    
+class SwinBlock(nn.Module):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: bool, shift: int, window_size: int, rel_pos: bool, mlp_dim: int):
+        super().__init__()
+        self.layer_norm1 = nn.LayerNorm(dim)
+        self.window_attn = WindowAttention(dim=dim, heads=heads, head_dim=head_dim, shifted=shifted,
+                                            shift=shift, window_size=window_size, rel_pos=rel_pos)
+        self.mlp = nn.Sequential(
+            nn.Linear(in_features=dim, out_features=mlp_dim),
+            nn.GELU(),
+            nn.Linear(in_features=mlp_dim, out_features=dim)
+        )
+        self.layer_norm2 = nn.LayerNorm(dim)
+    
+    def forward(self, x: t.Tensor) -> t.Tensor:
+        x1 = self.window_attn(self.layer_norm1(x)) + x
+        x2 = self.mlp(self.layer_norm2(x1)) + x1
+        return x2
