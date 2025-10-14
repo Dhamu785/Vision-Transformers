@@ -122,3 +122,25 @@ class SwinBlock(nn.Module):
         x1 = self.window_attn(self.layer_norm1(x)) + x
         x2 = self.mlp(self.layer_norm2(x1)) + x1
         return x2
+
+class Stages(nn.Module):
+    def __init__(self, in_dim: int, hidden_dim: int, layers: int, downscaling_factor: int, heads: int, head_dim: int, window_size: int, rel_pos: bool):
+        super().__init__()
+        assert layers % 2 == 0, "Each layers must be divisible by 2"
+
+        self.down_scale = PatchMerge(in_channel=in_dim, out_channels=hidden_dim, downscaling_factor=downscaling_factor)
+        self.layers = nn.ModuleList([])
+        for _ in range(layers//2):
+            self.layers.append(nn.ModuleList([
+                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=False, shift=2, 
+                            window_size=window_size, rel_pos=rel_pos, mlp_dim=hidden_dim*4),
+                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=True, shift=2, 
+                            window_size=window_size, rel_pos=rel_pos, mlp_dim=hidden_dim*4)
+            ]))
+
+    def forward(self, x:t.Tensor) -> t.Tensor:
+        x = self.down_scale(x)
+        for wmha, swmha in self.layers:
+            x = wmha(x)
+            x = swmha(x)
+        return x.permute(0, 3, 1, 2)
