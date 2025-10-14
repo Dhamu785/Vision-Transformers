@@ -39,7 +39,7 @@ def get_mask(img_resolution: Tuple[int, int], window_size: int, shift: int, devi
     return att_mask # no. of windows, window size ** 2, window size ** 2
 
 class WindowAttention(nn.Module):
-    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, shift:int, window_size: int, rel_pos: bool):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: int, window_size: int, rel_pos: bool):
         super().__init__()
         inner_dim = heads * head_dim
         self.head_dim = head_dim
@@ -47,7 +47,6 @@ class WindowAttention(nn.Module):
         self.shifted = shifted
         self.window_size = window_size
         self.rel_pos = rel_pos
-        self.shift = shift
         self.heads = heads
         self.dim = dim
 
@@ -64,6 +63,7 @@ class WindowAttention(nn.Module):
 
         self.register_buffer("attention_mask", None)
         self.register_buffer("input_resolution", None)
+        self.register_buffer("shift_value", None)
 
         self.qkv = nn.Linear(in_features = dim, out_features = inner_dim*3, bias=False)
         self.to_out = nn.Linear(in_features=inner_dim, out_features=dim)
@@ -72,10 +72,12 @@ class WindowAttention(nn.Module):
         b, h, w, d = x.shape
         nh, nw = h // self.window_size, w // self.window_size
         if self.shifted:
-            x = t.roll(x, shifts=(-self.shift, -self.shift), dims=(1,2))
+            shift_val = self.window_size // 2
+            self.shift_value = t.scalar_tensor(shift_val, dtype=t.int)
+            x = t.roll(x, shifts=(-self.shift_value, -self.shift_value), dims=(1,2))
             current_res = (h, w)
             if self.attention_mask is None or current_res != self.input_resolution:
-                mask = get_mask(current_res, self.window_size, self.shift, x.device)
+                mask = get_mask(current_res, self.window_size, self.shift_value, x.device)
                 self.attention_mask = mask # no. of windows, window size ** 2, window size ** 2
                 self.input_resolution = t.tensor(current_res)
 
@@ -101,16 +103,16 @@ class WindowAttention(nn.Module):
         reverse = self.to_out(reverse)
 
         if self.shifted:
-            reverse = t.roll(reverse, shifts=(self.shift, self.shift), dims=(1,2))
+            reverse = t.roll(reverse, shifts=(self.shift_value, self.shift_value), dims=(1,2))
 
         return reverse
     
 class SwinBlock(nn.Module):
-    def __init__(self, dim: int, heads: int, head_dim: int, shifted: bool, shift: int, window_size: int, rel_pos: bool, mlp_dim: int):
+    def __init__(self, dim: int, heads: int, head_dim: int, shifted: bool, window_size: int, rel_pos: bool, mlp_dim: int):
         super().__init__()
         self.layer_norm1 = nn.LayerNorm(dim)
         self.window_attn = WindowAttention(dim=dim, heads=heads, head_dim=head_dim, shifted=shifted,
-                                            shift=shift, window_size=window_size, rel_pos=rel_pos)
+                                                window_size=window_size, rel_pos=rel_pos)
         self.mlp = nn.Sequential(
             nn.Linear(in_features=dim, out_features=mlp_dim),
             nn.GELU(),
@@ -132,9 +134,9 @@ class Stages(nn.Module):
         self.layers = nn.ModuleList([])
         for _ in range(layers//2):
             self.layers.append(nn.ModuleList([
-                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=False, shift=2, 
+                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=False, 
                             window_size=window_size, rel_pos=rel_pos, mlp_dim=hidden_dim*4),
-                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=True, shift=2, 
+                SwinBlock(dim=hidden_dim, heads=heads, head_dim=head_dim, shifted=True, 
                             window_size=window_size, rel_pos=rel_pos, mlp_dim=hidden_dim*4)
             ]))
 
