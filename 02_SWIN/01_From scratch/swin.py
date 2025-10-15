@@ -18,6 +18,8 @@ class swin_transformer(t.nn.Module):
                                 heads=heads[3], head_dim=head_dim, window_size=window_size, rel_pos=relative_position)
         self.mlp = t.nn.Sequential(
             t.nn.AdaptiveAvgPool2d(output_size=1),
+            t.nn.Flatten(),
+            t.nn.LayerNorm(hidden_dim*8),
             t.nn.Linear(in_features=hidden_dim*8, out_features=num_clas)
         )
 
