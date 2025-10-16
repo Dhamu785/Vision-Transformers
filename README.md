@@ -3,3 +3,5 @@
 - register buffer
 
 # 02. SWIN-Transformer
+- register buffer implementation
+- einsum (rearrange and matrix multiplication)
