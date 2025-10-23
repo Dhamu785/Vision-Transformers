@@ -3,5 +3,13 @@
 - register buffer
 
 # 02. SWIN-Transformer
-- register buffer implementation
-- einsum (rearrange and matrix multiplication)
+- Register buffer - implementation 
+- Einsum (Efficient matrix multiplication) and rearrange
+- TorchScripting
+- Model compile
+- CheckPoint
+- Profiler and hooks
+- Visualization (TensorBoard and Weights & Bias)
+- Scale and auto-cast
+- Learning rate scheduler
+- ViT notes
