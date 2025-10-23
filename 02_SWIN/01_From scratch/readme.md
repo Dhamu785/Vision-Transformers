@@ -52,9 +52,10 @@
 
 ### **03. Features**
 - Register buffer
-- Einsum (Efficient matrix multiplication)
+- Einsum (Efficient matrix multiplication), rearrange
 - TorchScripting
 - Model compile
 - CheckPoint
 - Profiler and hooks
 - Visualization (TensorBoard and Weights and Bias)
+- ViT notes
