@@ -48,4 +48,5 @@
 - `Output shape :` (B, H/4, W/4, C)
 #### 02. Window attention
 - `params :` dim=96, heads=3, head_dim=32, shifted=True/False, window_size=7, relative_pos_embedding=True
-- Input shape :` (B, H/4, w/4, C) => (8, H/4, W/4, 96)
+- `Input shape :` (B, H/4, w/4, C) => (8, H/4, W/4, 96)
+- `Output shape :` (8, H/4, W/4, 96)
