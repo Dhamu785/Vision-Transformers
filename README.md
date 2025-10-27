@@ -11,5 +11,5 @@
 - Profiler and hooks
 - Visualization (TensorBoard and Weights & Bias)
 - Scale and auto-cast
-- Learning rate scheduler
+- Learning rate scheduler & warmups
 - ViT notes
