@@ -53,7 +53,7 @@ class train:
             bar = tqdm(iterable=range(test_len), desc='Test batch processing', unit='Batchs', colour='RED')
             for x, lbl in self.test_data:
                 x = x.to(self.device)
-                lbl = y.to(self.device)
+                lbl = lbl.to(self.device)
 
                 with t.inference_mode():
                     pred = model(x)
