@@ -3,6 +3,7 @@
 - register buffer
 
 # 02. SWIN-Transformer
+### Features planning to support
 - Register buffer - implementation 
 - Einsum (Efficient matrix multiplication) and rearrange
 - TorchScripting
