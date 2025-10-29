@@ -1,7 +1,7 @@
 import os
 import shutil
+from typing import Tuple, List
 
-from numpy.lib.function_base import iterable
 from tqdm import tqdm
 import torch as t
 from torch.utils.data import DataLoader
@@ -18,7 +18,7 @@ class train:
         self.device = device
         self.scaler = t.GradScaler(device=device)
 
-    def start(self, model: t.nn.Module) -> t.Tensor:
+    def start(self, model: t.nn.Module) -> Tuple[List[float], List[float]]:
         model.to(device=self.device)
 
         train_loss = []
