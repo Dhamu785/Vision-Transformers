@@ -25,6 +25,10 @@ class train:
         test_loss = []
         train_len = len(self.train_data)
         test_len = len(self.test_data)
+        sav_dir = os.path.join(os.getcwd(), 'runs')
+        if os.path.exists(sav_dir):
+            shutil.rmtree(sav_dir)
+        os.mkdir(sav_dir)
 
         for epoch in range(1, self.epochs+1):
             bar = tqdm(iterable=range(train_len), desc='Batch processing', unit='Batchs', colour='GREEN')
@@ -65,10 +69,6 @@ class train:
             bar.close()
             test_loss.append(epoch_test_loss/test_len)
 
-            sav_dir = os.path.join(os.getcwd(), 'runs')
-            if os.path.exists(sav_dir):
-                shutil.rmtree(sav_dir)
-            os.mkdir(sav_dir)
             t.save(model.state_dict(), f"{sav_dir}/mdl-{epoch}.pt")
             print(f"{epoch}/{self.epochs} | train loss = {train_loss[-1]:.4f} | test loss = {test_loss[-1]:.4f}")
 
