@@ -64,7 +64,7 @@ class train:
                     ls = self.loss(pred, lbl)
                 epoch_test_loss += ls.item()
                 
-                bar.set_postfix(loss=f"{epoch_test_loss:.4f}")
+                bar.set_postfix(loss=f"{ls.item():.4f}")
                 bar.update(1)
             bar.close()
             test_loss.append(epoch_test_loss/test_len)
