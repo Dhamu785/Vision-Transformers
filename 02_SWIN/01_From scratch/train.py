@@ -1,8 +1,9 @@
 import os
 import shutil
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 import torch as t
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
@@ -73,3 +74,17 @@ class Trainer:
             print(f"{epoch}/{self.epochs} | train loss = {train_loss[-1]:.4f} | test loss = {test_loss[-1]:.4f}")
 
         return train_loss, test_loss
+    
+def plot(imgs: List[t.Tensor], predictions: t.Tensor, true: t.Tensor, lbl: Dict[str,int]) -> None:
+    plt.figure(figsize=(20, 20))
+    for i in range(1, 26):
+        plt.subplot(5, 5, i)
+        plt.imshow(imgs[i-1].permute(1,2,0).cpu().numpy())
+        true_lbl = lbl[true[i-1]]
+        pred_lbl = lbl[predictions[i-1]]
+        if true_lbl == pred_lbl:
+            plt.title(f"{pred_lbl}", color='green')
+        else:
+            plt.title(f"act: {true_lbl}\npred: {pred_lbl}", color='red')
+        plt.axis('off')
+    plt.show()
