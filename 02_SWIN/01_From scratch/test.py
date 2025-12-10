@@ -16,7 +16,7 @@ model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidde
                         head_dim=Config.head_dim, window_size=Config.window_size, 
                         relative_position=Config.relative_pos, num_clas=Config.num_class).to(DEVICE)
 # %%
-model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\mdl-7.pt"
+model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\runs zip\\mdl-10.pt"
 model.load_state_dict(t.load(os.path.join(model_path), map_location=DEVICE, weights_only=True), strict=False)
 # %%
 model

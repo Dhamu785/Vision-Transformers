@@ -45,14 +45,14 @@ def no_shift(mdl, inp, out):
 def shifted(mdl, inp, out):
     layers['shifted']['output'] = out.detach().cpu()
 
-swin_model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+# %%
+def get_filters(model_path):
+    swin_model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                         downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
                         head_dim=Config.head_dim, window_size=Config.window_size, 
                         relative_position=Config.relative_pos, num_clas=Config.num_class).to(DEVICE)
-
-# %%
-def get_filters(model_path):
-    swin_model.load_state_dict(t.load(os.path.join(model_path), map_location=DEVICE, weights_only=True), strict=False)
+    
+    swin_model.load_state_dict(t.load(model_path, map_location=DEVICE, weights_only=True), strict=False)
 
     swin_model.stage1.down_scale.patch_merge.register_forward_hook(input1)
     swin_model.stage1.down_scale.linear.register_forward_hook(input2)
@@ -61,14 +61,14 @@ def get_filters(model_path):
     with t.inference_mode():
         swin_model(test.to(DEVICE))
 # %%
-model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\mdl-7.pt"
+model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\runs zip"
 models = os.listdir(model_path)
 for i in models:
     layers = {'no shift': {}, 'shifted': {}}
     mp = os.path.join(model_path, i)
     epoch = i.split('-')[1].split('.')[0]
     if int(epoch) % 10 == 0:
-        get_filters(model_path=model_path)
+        get_filters(model_path=mp)
         with open(f'Hooks\\from_mdl-{epoch}.pkl', 'wb') as f:
             pkl.dump(layers, f)
 # %%
