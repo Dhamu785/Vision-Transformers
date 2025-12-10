@@ -33,10 +33,11 @@ sample_path = 'C:\\Users\\dhamu\\Documents\\Python all\\torch_works\\03\\Vision-
 test = collect_img(sample_path)
 
 # %% Functions to record filters
-layers = {'no shift': {}, 'shifted': {}}
+def input1(mdl, inp, out):
+    layers['input1'] = inp[0].detach().cpu()
 
-def inp(mdl, inp, out):
-    layers['inputs'] = inp[0].detach().cpu()
+def input2(mdl, inp, out):
+    layers['input2'] = out[0].detach().cpu()
 
 def no_shift(mdl, inp, out):
     layers['no shift']['output'] = out.detach().cpu()
@@ -51,16 +52,28 @@ swin_model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.
 
 # %%
 def get_filters(model_path):
-    epoch = os.path.basename(model_path).split('-')[1].split('.')[0]
     swin_model.load_state_dict(t.load(os.path.join(model_path), map_location=DEVICE, weights_only=True), strict=False)
 
-    swin_model.stage1.layers[0][0].window_attn.to_out.register_forward_hook(inp)
+    swin_model.stage1.down_scale.patch_merge.register_forward_hook(input1)
+    swin_model.stage1.down_scale.linear.register_forward_hook(input2)
+    swin_model.stage1.layers[0][0].window_attn.to_out.register_forward_hook(no_shift)
 
     with t.inference_mode():
         swin_model(test.to(DEVICE))
 # %%
 model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\mdl-7.pt"
-get_filters(model_path=model_path)
+models = os.listdir(model_path)
+for i in models:
+    layers = {'no shift': {}, 'shifted': {}}
+    mp = os.path.join(model_path, i)
+    epoch = i.split('-')[1].split('.')[0]
+    if int(epoch) % 10 == 0:
+        get_filters(model_path=model_path)
+        with open(f'Hooks\\from_mdl-{epoch}.pkl', 'wb') as f:
+            pkl.dump(layers, f)
 # %%
-layers['inputs'].shape
+layers['input1'].shape
+# %%
+layers['input2'].shape
+
 # %%
