@@ -9,4 +9,4 @@ class Config:
     head_dim: int = 32
     window_size: int = 7
     relative_pos: bool = True
-    num_class: int = 10
+    num_class: int = 211
