@@ -19,5 +19,7 @@ model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidde
 model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\mdl-7.pt"
 model.load_state_dict(t.load(os.path.join(model_path), map_location=DEVICE, weights_only=True), strict=False)
 # %%
+model
+# %%
 model.stage1.layers[0][0].window_attn.to_out
 # %%
