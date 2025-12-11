@@ -33,8 +33,8 @@ sample_path = 'C:\\Users\\dhamu\\Documents\\Python all\\torch_works\\03\\Vision-
 test = collect_img(sample_path)
 
 # %% Functions to record filters
-def input1(mdl, inp, out):
-    layers['input1'] = inp[0].detach().cpu()
+def input(mdl, inp, out):
+    layers['input'] = inp[0].detach().cpu()
     layers['resized'] = out.detach().cpu()
 
 def no_shift(mdl, inp, out):
@@ -52,7 +52,7 @@ def get_filters(model_path):
     
     swin_model.load_state_dict(t.load(model_path, map_location=DEVICE, weights_only=True), strict=False)
 
-    swin_model.stage1.down_scale.patch_merge.register_forward_hook(input1)
+    swin_model.stage1.down_scale.patch_merge.register_forward_hook(input)
     swin_model.stage1.layers[0][0].window_attn.to_out.register_forward_hook(no_shift)
     swin_model.stage1.layers[0][1].window_attn.to_out.register_forward_hook(shifted)
 
