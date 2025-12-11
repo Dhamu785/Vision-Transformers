@@ -57,6 +57,7 @@ def get_filters(model_path):
     swin_model.stage1.down_scale.patch_merge.register_forward_hook(input1)
     swin_model.stage1.down_scale.linear.register_forward_hook(input2)
     swin_model.stage1.layers[0][0].window_attn.to_out.register_forward_hook(no_shift)
+    swin_model.stage1.layers[0][1].window_attn.to_out.register_forward_hook(shifted)
 
     with t.inference_mode():
         swin_model(test.to(DEVICE))

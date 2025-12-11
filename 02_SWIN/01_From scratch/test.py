@@ -21,5 +21,5 @@ model.load_state_dict(t.load(os.path.join(model_path), map_location=DEVICE, weig
 # %%
 model
 # %%
-model.stage1.layers[0][0].window_attn.to_out
+model.stage1.layers[0][1].window_attn.to_out
 # %%
