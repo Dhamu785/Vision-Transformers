@@ -9,19 +9,27 @@ with open(pkl_pth, 'rb') as f:
 
 print(data.keys())
 # %%
-data['shifted']['output'].shape
-data['input2'].shape
-# %%
-# grid = make_grid(data['input1'][:,2,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
-grid = make_grid(data['input1'][:,:,:], 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+print(f"Shaped for\ninput = {data['input'].shape}\nno resized = {data['resized'].shape}")
+print(f"Shaped for shifted = {data['shifted']['output'].shape}\nno shift = {data['no shift']['output'].shape}")
 
+# %% View input image
+grid = make_grid(data['input'][:,:,:], 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+
+# %% resized view
+grid = make_grid(data['resized'].permute(0,3,1,2)[:,2,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+
+# %% Shifted
+grid = make_grid(data['shifted']['output'].permute(0,3,1,2)[:,0,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+
+# %% No shift
+grid = make_grid(data['no shift']['output'].permute(0,3,1,2)[:,0,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
 # %%
 grid.shape
 # %%
 f, axs = plt.subplots(figsize=(5,10))
 axs.set_axis_off()
-# plt.close()
-axs.imshow(grid, cmap='gray')
+axs.imshow(grid, cmap='binary')
+
 # %%
 grid.min(), grid.max()
 
