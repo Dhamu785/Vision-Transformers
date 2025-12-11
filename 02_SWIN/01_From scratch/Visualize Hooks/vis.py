@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import pickle as pkl
 from torchvision.utils import make_grid, save_image
+import os
+import shutil
 # %%
 pkl_pth = 'C:\\Users\\dhamu\\Documents\\Python all\\torch_works\\03\\Vision-Transformers\\02_SWIN\\01_From scratch\\Hooks\\from_mdl-10.pkl'
 with open(pkl_pth, 'rb') as f:
@@ -23,7 +25,14 @@ print(f"Shaped for shifted = {data['shifted']['output'].shape}\nno shift = {data
 grid = make_grid(data['input'], 2, 3, pad_value=2, normalize=True)
 save_image(grid, 'test_samples.png')
 # %% resized view
-grid = make_grid(data['resized'].permute(0,3,1,2)[:,2,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+sav_loc = os.path.join(os.getcwd(), 'resized')
+if os.path.exists(sav_loc):
+    shutil.rmtree(sav_loc)
+os.mkdir(sav_loc)
+
+for i in range(48):
+    grid = make_grid(data['resized'].permute(0,3,1,2)[:,i,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True)
+    save_image(grid, os.path.join(sav_loc, f'resized-f{i}.png'))
 
 # %% Shifted
 grid = make_grid(data['shifted']['output'].permute(0,3,1,2)[:,0,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
