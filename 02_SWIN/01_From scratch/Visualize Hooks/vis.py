@@ -10,4 +10,19 @@ with open(pkl_pth, 'rb') as f:
 print(data.keys())
 # %%
 data['shifted']['output'].shape
+data['input2'].shape
+# %%
+# grid = make_grid(data['input1'][:,2,:,:].unsqueeze(1), 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+grid = make_grid(data['input1'][:,:,:], 2, 3, pad_value=2, normalize=True).moveaxis(0, 2)
+
+# %%
+grid.shape
+# %%
+f, axs = plt.subplots(figsize=(5,10))
+axs.set_axis_off()
+# plt.close()
+axs.imshow(grid, cmap='gray')
+# %%
+grid.min(), grid.max()
+
 # %%
