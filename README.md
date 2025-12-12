@@ -4,13 +4,16 @@
 
 # 02. SWIN-Transformer
 ### Features planning to support
-- Register buffer - implementation 
-- Einsum (Efficient matrix multiplication) and rearrange
-- TorchScripting
-- Model compile
-- CheckPoint
-- Profiler and hooks
-- Visualization (TensorBoard and Weights & Bias)
-- Scale and auto-cast
-- Learning rate scheduler & warmups
+- To speed up training
+    - Register buffer - implementation
+    - TorchScripting
+    - Model compile
+    - CheckPoint
+    - Einsum (Efficient matrix multiplication) and rearrange
+    - Scale and auto-cast
+- Debugging
+    - Profiler and hooks
+    - Visualization (TensorBoard and Weights & Bias)
+- Improve training
+    - Learning rate scheduler & warmups
 - ViT notes
