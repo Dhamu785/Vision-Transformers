@@ -32,7 +32,7 @@ class Trainer:
         os.mkdir(sav_dir)
 
         for epoch in range(1, self.epochs+1):
-            bar = tqdm(iterable=range(train_len), desc='Batch processing', unit='Batchs', colour='GREEN')
+            bar = tqdm(iterable=range(train_len), desc='Train Batch processing', unit='Batchs', colour='GREEN')
             model.train()
             epoch_train_loss = 0
             for x, lbl in self.train_data:
