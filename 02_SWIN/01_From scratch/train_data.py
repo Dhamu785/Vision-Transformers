@@ -1,11 +1,11 @@
-import os
-import shutil
 import matplotlib.pyplot as plt
+import time
 
 import torch as t
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
+st = time.time()
 DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 print(f"Available device = {DEVICE}")
 
@@ -50,11 +50,16 @@ swin_model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.
                         head_dim=Config.head_dim, window_size=Config.window_size, 
                         relative_position=Config.relative_pos, num_clas=num_classes).to(DEVICE)
 
+model_path = "F:\\CBIR\\SWIN\\runs1\\mdl-100.pt"
+swin_model.load_state_dict(t.load(model_path, map_location=t.device(DEVICE), weights_only=True), strict=False)
+
 loss = t.nn.CrossEntropyLoss()
 optimizer = t.optim.AdamW(swin_model.parameters(), lr=lr)
 
 training = train.Trainer(train_loader, val_loader, epochs, loss, optimizer, DEVICE)
 history = training.start(swin_model)
+
+training_time = time.time()
 
 x, lbl = next(iter(val_loader))
 y = swin_model(x.to(DEVICE))
@@ -74,11 +79,15 @@ def plot(imgs, predictions, true, lbl) -> None:
         else:
             plt.title(f"act: {true_lbl}\npred: {pred_lbl}", color='red')
         plt.axis('off')
-    plt.show()
+    plt.savefig("Predictions.jpg")
+    plt.close()
 
 plot(imgs=x, predictions=t.argmax(y, 1), true=lbl, lbl=lbls)
 
 plt.plot(history[0], label='train loss')
 plt.plot(history[1], label='test loss')
 plt.legend()
-plt.show()
+plt.savefig("Training history.jpg")
+plt.close()
+
+print(f"Model training time = {(st-training_time)/60}Min\nTotal time taken = {(st - time.time())/60}Min")
