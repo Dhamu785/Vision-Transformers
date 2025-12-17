@@ -1,8 +1,3 @@
-# %% config path
-import sys
-import os
-
-sys.path.append(os.path.join(os.getcwd(), '02_SWIN', '01_From scratch'))
 # %% imports
 import os
 import numpy as np
@@ -62,7 +57,7 @@ def get_filters(model_path):
     with t.inference_mode():
         swin_model(test.to(DEVICE))
 # %%
-model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\runs zip"
+model_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Model samples"
 models = os.listdir(model_path)
 for i in models:
     layers = {'no shift': {}, 'shifted': {}}
