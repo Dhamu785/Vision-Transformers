@@ -27,18 +27,11 @@ def collect_img(img_path):
 sample_path = 'C:\\Users\\dhamu\\Documents\\Python all\\torch_works\\03\\Vision-Transformers\\02_SWIN\\01_From scratch\\sample_dataset'
 test = collect_img(sample_path)
 
-# %% Functions to record filters
-def inputs(mdl, inp, out):
-    layers['input'] = inp[0].detach().cpu()
-
-def resized(mdl, inp, out):
-    layers['resized'] = inp[0].detach().cpu()
-
-def no_shift(mdl, inp, out):
-    layers['no shift']['output'] = out.detach().cpu()
-
-def shifted(mdl, inp, out):
-    layers['shifted']['output'] = out.detach().cpu()
+# %% Functions to record filters (Hooks factory)
+def get_hook(name: str, capture_input: bool) -> t.Tensor:
+    def hook(model, inpt, outpt):
+        data = inpt[0] if capture_input else outpt
+        layers[name] = data.detach().cpu()
 
 # %%
 def get_filters(model_path):
@@ -48,11 +41,6 @@ def get_filters(model_path):
                         relative_position=Config.relative_pos, num_clas=Config.num_class).to(DEVICE)
     
     swin_model.load_state_dict(t.load(model_path, map_location=DEVICE, weights_only=True), strict=False)
-
-    swin_model.stage1.down_scale.patch_merge.register_forward_hook(inputs)
-    swin_model.stage1.down_scale.linear.register_forward_hook(resized)
-    swin_model.stage1.layers[0][0].window_attn.to_out.register_forward_hook(no_shift)
-    swin_model.stage1.layers[0][1].window_attn.to_out.register_forward_hook(shifted)
 
     with t.inference_mode():
         swin_model(test.to(DEVICE))
