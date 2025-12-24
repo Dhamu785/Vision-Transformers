@@ -14,13 +14,7 @@
 - Debugging
     - Profiler and hooks
     - Visualization (TensorBoard and Weights & Bias)
-    - Layers
-          - Inputs/Outputs
-          - Feature map
-          - Activation
-          - Attention
-          - Gradient flow
-          - Loss decomposition
+    - Layers -> (Inputs/Outputs, Feature map, Activation, Attention, Gradient flow, Loss decomposition)
 - Improve training
     - Learning rate scheduler & warmups
 - ViT notes
