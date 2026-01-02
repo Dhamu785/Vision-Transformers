@@ -1,0 +1,100 @@
+swin_transformer(
+  (stage1): Stages(
+    (down_scale): PatchMerge(
+      (patch_merge): Unfold(kernel_size=4, dilation=1, padding=0, stride=4)
+      (linear): Linear(in_features=48, out_features=96, bias=False)
+    )
+    (layers): ModuleList(
+      (0): ModuleList(
+        (0-1): 2 x SwinBlock(
+          (layer_norm1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (window_attn): WindowAttention(
+            (qkv): Linear(in_features=96, out_features=288, bias=False)
+            (to_out): Linear(in_features=96, out_features=96, bias=True)
+          )
+          (mlp): Sequential(
+            (0): Linear(in_features=96, out_features=384, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=384, out_features=96, bias=True)
+          )
+          (layer_norm2): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+  )
+  (stage2): Stages(
+    (down_scale): PatchMerge(
+      (patch_merge): Unfold(kernel_size=2, dilation=1, padding=0, stride=2)
+      (linear): Linear(in_features=384, out_features=192, bias=False)
+    )
+    (layers): ModuleList(
+      (0): ModuleList(
+        (0-1): 2 x SwinBlock(
+          (layer_norm1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (window_attn): WindowAttention(
+            (qkv): Linear(in_features=192, out_features=576, bias=False)
+            (to_out): Linear(in_features=192, out_features=192, bias=True)
+          )
+          (mlp): Sequential(
+            (0): Linear(in_features=192, out_features=768, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=768, out_features=192, bias=True)
+          )
+          (layer_norm2): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+  )
+  (stage3): Stages(
+    (down_scale): PatchMerge(
+      (patch_merge): Unfold(kernel_size=2, dilation=1, padding=0, stride=2)
+      (linear): Linear(in_features=768, out_features=384, bias=False)
+    )
+    (layers): ModuleList(
+      (0-2): 3 x ModuleList(
+        (0-1): 2 x SwinBlock(
+          (layer_norm1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (window_attn): WindowAttention(
+            (qkv): Linear(in_features=384, out_features=1152, bias=False)
+            (to_out): Linear(in_features=384, out_features=384, bias=True)
+          )
+          (mlp): Sequential(
+            (0): Linear(in_features=384, out_features=1536, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=1536, out_features=384, bias=True)
+          )
+          (layer_norm2): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+  )
+  (stage4): Stages(
+    (down_scale): PatchMerge(
+      (patch_merge): Unfold(kernel_size=2, dilation=1, padding=0, stride=2)
+      (linear): Linear(in_features=1536, out_features=768, bias=False)
+    )
+    (layers): ModuleList(
+      (0): ModuleList(
+        (0-1): 2 x SwinBlock(
+          (layer_norm1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (window_attn): WindowAttention(
+            (qkv): Linear(in_features=768, out_features=2304, bias=False)
+            (to_out): Linear(in_features=768, out_features=768, bias=True)
+          )
+          (mlp): Sequential(
+            (0): Linear(in_features=768, out_features=3072, bias=True)
+            (1): GELU(approximate='none')
+            (2): Linear(in_features=3072, out_features=768, bias=True)
+          )
+          (layer_norm2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+    )
+  )
+  (mlp): Sequential(
+    (0): AdaptiveAvgPool2d(output_size=1)
+    (1): Flatten(start_dim=1, end_dim=-1)
+    (2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+    (3): Linear(in_features=768, out_features=211, bias=True)
+  )
+)
