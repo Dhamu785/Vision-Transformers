@@ -2,25 +2,29 @@
 import torch as t
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import seaborn as sns
 
 from swin import swin_transformer
 from config import Config
 
 # %% load model
 DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
-mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\sample models\\mdl-10.pt"
+mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\food\\custom"
+mdls = os.listdir(mdl_pth)
 
-model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+layer1 = dict()
+for m in mdls:
+    mdl = os.path.join(mdl_pth, m)
+    model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                         downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
                         head_dim=Config.head_dim, window_size=Config.window_size, 
-                        relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
-model.load_state_dict(t.load(mdl_pth, map_location = DEVICE, weights_only = True), strict = False)
+                        relative_position=Config.relative_pos, num_clas=211).to(DEVICE)
+    model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
+    layer1[m] = np.ravel(model.stage1.down_scale.linear.weight.to('cpu').detach().numpy())
 # %%
-lyr1 = np.ravel(model.stage1.down_scale.linear.weight.to('cpu').detach().numpy())
-
-# %%
-lyr1
-# %%
-plt.hist(lyr1)
+plt.figure(figsize=(15,5))
+for i in layer1.keys():
+    plt.hist(layer1[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
+plt.legend()
 plt.show()
-# %%
