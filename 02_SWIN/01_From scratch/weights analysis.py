@@ -25,8 +25,12 @@ for m in mdls:
 # %%
 plt.figure(figsize=(15,5))
 for i in layer1.keys():
-    plt.hist(layer1[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
+    plt.hist(layer1[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.8)
 plt.legend()
+plt.xlabel('Weights')
+plt.ylabel('Epochs')
+plt.title('Food | Layer-1')
+plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
 plt.show()
 
 # %% curve
@@ -36,5 +40,3 @@ for i in layer1.keys():
     plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
 plt.legend(loc='right')
 plt.show()
-
-# %%
