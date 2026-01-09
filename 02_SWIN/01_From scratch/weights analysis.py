@@ -28,3 +28,13 @@ for i in layer1.keys():
     plt.hist(layer1[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
 plt.legend()
 plt.show()
+
+# %% curve
+for i in layer1.keys():
+    counts, bins = np.histogram(layer1[i], bins=10)
+    bin_centers = (bins[:-1] + bins[1:]) / 2
+    plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
+plt.legend(loc='right')
+plt.show()
+
+# %%
