@@ -45,7 +45,7 @@ plt.show()
 
 # %% Normalization analysis - Loading the model
 layer_norm1 = dict()
-mdl_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\food\\custom"
+mdl_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 # mdl_path = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/numbers/custom"
 models = os.listdir(mdl_path)
 file_sorted = sorted(models, key=lambda x: int(x.split('-')[-1].split('.')[0]))
@@ -55,7 +55,7 @@ for m in file_sorted:
         model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                                 downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
                                 head_dim=Config.head_dim, window_size=Config.window_size, 
-                                relative_position=Config.relative_pos, num_clas=211).to(DEVICE)
+                                relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
         model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
 
         gamma = model.stage1.layers[0][0].layer_norm1.weight.detach().cpu().tolist()
@@ -84,7 +84,7 @@ for i in range(1, 13):
         plt.plot(range(0,110,10), plotting_data_gamma[layer_no], label=f'ly-{layer_no}')
         layer_no += 1
     plt.legend(loc='upper right')
-
+    plt.suptitle('SVHN | LayerNorm1 (gamma)', y=0.93, x=0.51, fontsize=30)
 plt.show()
 # %%
 path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
