@@ -45,16 +45,33 @@ plt.show()
 
 # %% Normalization analysis
 layer_norm1 = dict()
-# mdl_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
-mdl_path = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/numbers/custom/mdl-10.pt"
-model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
-                        downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
-                        head_dim=Config.head_dim, window_size=Config.window_size, 
-                        relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
-model.load_state_dict(t.load(mdl_path, map_location = DEVICE, weights_only = True), strict = False)
+mdl_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
+# mdl_path = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/numbers/custom"
+models = os.listdir(mdl_path)
+print(models)
+for m in models:
+    if 'pt' in m:
+        mdl = os.path.join(mdl_path, m)
+        model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+                                downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
+                                head_dim=Config.head_dim, window_size=Config.window_size, 
+                                relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
+        model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
+
+        gamma = model.stage1.layers[0][0].layer_norm1.weight.detach().cpu().tolist()
+        beta = model.stage1.layers[0][0].layer_norm1.bias.detach().cpu().tolist()
+        layer_norm1[m] = {'gamma': gamma, 'beta':beta}
 # %%
-weights = model.stage1.down_scale.linear.weight
+layer_norm1
+# %% Analysis
+path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
+model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+                                downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
+                                head_dim=Config.head_dim, window_size=Config.window_size, 
+                                relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
+model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), strict = False)
+weights = model.stage1.down_scale.linear.weight.detach().cpu().tolist()
 
 # %%
-print(weights.tolist())
+model.stage1.layers[0][0].layer_norm1.weight.detach().cpu().tolist()
 # %%
