@@ -93,7 +93,8 @@ model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidde
                                 head_dim=Config.head_dim, window_size=Config.window_size, 
                                 relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
 model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), strict = False)
-weights = model.stage1.down_scale.linear.weight.detach().cpu().tolist()
+weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
 
-
+# %%
+model.state_dict().keys()
 # %%
