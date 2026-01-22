@@ -10,6 +10,23 @@ from config import Config
 # %% Giving the path
 DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 
+# %% defining functions
+mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
+mdls = os.listdir(mdl_pth)
+
+def get_weights(layer_name: str):
+    weights = dict()
+    for m in mdls:
+        if 'pt' in m:
+            mdl = os.path.join(mdl_pth, m)
+            model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+                            downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
+                            head_dim=Config.head_dim, window_size=Config.window_size, 
+                            relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
+            model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
+            state_dict = model.state_dict()
+            weights[layer_name] = state_dict[layer_name]
+    return weights
 # %% Load model and plotting layer1
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 # mdl_pth = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/food/custom"
@@ -96,5 +113,5 @@ model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), 
 weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
 
 # %%
-model.state_dict().keys()
+list(model.state_dict().keys())
 # %%
