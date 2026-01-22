@@ -3,6 +3,7 @@ import torch as t
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from typing import List, Dict, Literal
 
 from swin import swin_transformer
 from config import Config
@@ -25,32 +26,20 @@ def get_weights(layer_name: str):
                             relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
             model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
             state_dict = model.state_dict()
-            weights[layer_name] = state_dict[layer_name]
+            weights[layer_name] = state_dict[layer_name].detach().cpu().tolist()
     return weights
-# %% Load model and plotting layer1
-mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
-# mdl_pth = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/food/custom"
-mdls = os.listdir(mdl_pth)
-layer1 = dict()
-for m in mdls:
-    mdl = os.path.join(mdl_pth, m)
-    if 'pt' in mdl:
-        model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
-                            downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
-                            head_dim=Config.head_dim, window_size=Config.window_size, 
-                            relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
-        model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
-        layer1[m] = np.ravel(model.stage1.down_scale.linear.weight.to('cpu').detach().numpy())
 
-plt.figure(figsize=(15,5))
-for i in layer1.keys():
-    plt.hist(layer1[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.8)
-plt.legend(loc='upper right')
-plt.xlabel('Weights')
-plt.ylabel('Epochs')
-plt.title('SVHN | Layer-1')
-plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
-plt.show()
+def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
+    plt.figure(figsize=(15, 5))
+    if type == 'hist':
+        for i in data.keys():
+            plt.hist(data[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.8)
+            plt.legend(loc='upper right')
+            plt.xlabel('Weights')
+            plt.ylabel('Epochs')
+            plt.title(f'SVHN | Layer-1 | {name}')
+            plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
+            plt.show()
 
 # %% curve using bin centers
 for i in layer1.keys():
