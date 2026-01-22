@@ -15,10 +15,11 @@ DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 mdls = os.listdir(mdl_pth)
 file_sorted = sorted(mdls, key=lambda x: int(x.split('-')[-1].split('.')[0]))
+print(file_sorted)
 
 def get_weights(layer_name: str):
     weights = dict()
-    for m in mdls:
+    for m in file_sorted:
         if 'pt' in m:
             mdl = os.path.join(mdl_pth, m)
             model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
@@ -27,7 +28,7 @@ def get_weights(layer_name: str):
                             relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
             model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
             state_dict = model.state_dict()
-            weights[m.split('.')[0]] = state_dict[layer_name].detach().cpu().tolist()
+            weights[m.split('.')[0]] = state_dict[layer_name].detach().cpu().reshape(-1).tolist()
     return weights
 
 def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
@@ -40,17 +41,41 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
             plt.ylabel('Epochs')
             plt.title(f'SVHN | Layer-1 | {name}')
             plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
-            plt.show()
+        plt.show()
+    elif type == 'line_plot':
+        layer_no = 0
+        plt.figure(figsize=(25,15))
+        for i in range(1, 13):
+            plt.subplot(3, 4, i)
+            for j in range(layer_no, layer_no+8):
+                plt.plot(range(0,110,10), data[layer_no], label=f'ly-{layer_no}')
+                layer_no += 1
+            plt.legend(loc='upper right')
+            plt.suptitle(f'SVHN | LayerNorm1 (gamma) | {name}', y=0.93, x=0.51, fontsize=30)
+        plt.show()
 
 def arrange_norm(data: Dict):
-    layer_count = int(len(list(data.keys())[0]))
+    print(list(data.keys()))
+    layer_count = int(len(list(data.values())[0]))
+    print(layer_count)
     plotting_data = dict()
     for i in range(layer_count):
-        plotting_data[l] = []
+        plotting_data[i] = []
         for f in data.keys():
-            plotting_data[l].append(data[f][i])
+            plotting_data[i].append(data[f][i])
 
     return plotting_data
+
+# %% plot layer1
+weights = get_weights(layer_name = 'stage1.down_scale.linear.weight')
+plot(type='hist', data=weights, name='stage1.down_scale.linear.weight')
+
+# %% norm1
+weights = get_weights(layer_name = 'stage1.layers.0.0.layer_norm1.weight')
+print(weights.keys())
+weights = arrange_norm(weights)
+plot(type='line_plot', data=weights, name='stage1.layers.0.0.layer_norm1.weight')
+
 # %% curve using bin centers
 for i in layer1.keys():
     counts, bins = np.histogram(layer1[i], bins=10)
@@ -59,30 +84,6 @@ for i in layer1.keys():
 plt.legend(loc='right')
 plt.show()
 
-# %% Arranging the data
-plotting_data_gamma = dict()
-plotting_data_beta = dict()
-
-layers = 96
-for l in range(layers):
-    plotting_data_gamma[l] = []
-    plotting_data_beta[l] = []
-    for f in file_sorted:
-        plotting_data_gamma[l].append(layer_norm1[f]['gamma'][l])
-        plotting_data_beta[l].append(layer_norm1[f]['beta'][l])
-
-# layer_norm1['mdl-10.pt']['gamma'][0]
-# %% Plotting the data
-layer_no = 0
-plt.figure(figsize=(25,15))
-for i in range(1, 13):
-    plt.subplot(3, 4, i)
-    for j in range(layer_no, layer_no+8):
-        plt.plot(range(0,110,10), plotting_data_gamma[layer_no], label=f'ly-{layer_no}')
-        layer_no += 1
-    plt.legend(loc='upper right')
-    plt.suptitle('SVHN | LayerNorm1 (gamma)', y=0.93, x=0.51, fontsize=30)
-plt.show()
 # %%
 path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
 model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
@@ -90,8 +91,12 @@ model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidde
                                 head_dim=Config.head_dim, window_size=Config.window_size, 
                                 relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
 model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), strict = False)
-weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
+# weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
+weights = model.stage1.down_scale.linear.weight.detach().cpu().tolist()
+
 
 # %%
 list(model.state_dict().keys())
+# %%
+plt.hist(weights, histtype='step')
 # %%
