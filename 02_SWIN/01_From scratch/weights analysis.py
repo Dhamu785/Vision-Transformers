@@ -14,6 +14,7 @@ DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 # %% defining functions
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 mdls = os.listdir(mdl_pth)
+file_sorted = sorted(mdls, key=lambda x: int(x.split('-')[-1].split('.')[0]))
 
 def get_weights(layer_name: str):
     weights = dict()
@@ -26,7 +27,7 @@ def get_weights(layer_name: str):
                             relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
             model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
             state_dict = model.state_dict()
-            weights[layer_name] = state_dict[layer_name].detach().cpu().tolist()
+            weights[m.split('.')[0]] = state_dict[layer_name].detach().cpu().tolist()
     return weights
 
 def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
@@ -41,6 +42,15 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
             plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
             plt.show()
 
+def arrange_norm(data: Dict):
+    layer_count = int(len(list(data.keys())[0]))
+    plotting_data = dict()
+    for i in range(layer_count):
+        plotting_data[l] = []
+        for f in data.keys():
+            plotting_data[l].append(data[f][i])
+
+    return plotting_data
 # %% curve using bin centers
 for i in layer1.keys():
     counts, bins = np.histogram(layer1[i], bins=10)
@@ -48,25 +58,6 @@ for i in layer1.keys():
     plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
 plt.legend(loc='right')
 plt.show()
-
-# %% Normalization analysis - Loading the model
-layer_norm1 = dict()
-mdl_path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
-# mdl_path = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/numbers/custom"
-models = os.listdir(mdl_path)
-file_sorted = sorted(models, key=lambda x: int(x.split('-')[-1].split('.')[0]))
-for m in file_sorted:
-    if 'pt' in m:
-        mdl = os.path.join(mdl_path, m)
-        model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
-                                downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
-                                head_dim=Config.head_dim, window_size=Config.window_size, 
-                                relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
-        model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
-
-        gamma = model.stage1.layers[0][0].layer_norm1.weight.detach().cpu().tolist()
-        beta = model.stage1.layers[0][0].layer_norm1.bias.detach().cpu().tolist()
-        layer_norm1[m] = {'gamma': gamma, 'beta':beta}
 
 # %% Arranging the data
 plotting_data_gamma = dict()
