@@ -1,9 +1,8 @@
 # %% imports
 import torch as t
 import matplotlib.pyplot as plt
-import numpy as np
 import os
-from typing import List, Dict, Literal
+from typing import Dict, Literal
 
 from swin import swin_transformer
 from config import Config
@@ -22,7 +21,6 @@ DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 mdls = os.listdir(mdl_pth)
 file_sorted = sorted(mdls, key=lambda x: int(x.split('-')[-1].split('.')[0]))
-print(file_sorted)
 
 def get_weights(layer_name: str):
     weights = dict()
@@ -62,9 +60,7 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
         plt.show()
 
 def arrange_norm(data: Dict):
-    print(list(data.keys()))
     layer_count = int(len(list(data.values())[0]))
-    print(layer_count)
     plotting_data = dict()
     for i in range(layer_count):
         plotting_data[i] = []
