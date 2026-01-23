@@ -10,6 +10,13 @@ from config import Config
 
 # %% Giving the path
 DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
+# curve using bin centers
+# for i in layer1.keys():
+#     counts, bins = np.histogram(layer1[i], bins=10)
+#     bin_centers = (bins[:-1] + bins[1:]) / 2
+#     plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
+# plt.legend(loc='right')
+# plt.show()
 
 # %% defining functions
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
@@ -72,17 +79,8 @@ plot(type='hist', data=weights, name='stage1.down_scale.linear.weight')
 
 # %% norm1
 weights = get_weights(layer_name = 'stage1.layers.0.0.layer_norm1.weight')
-print(weights.keys())
 weights = arrange_norm(weights)
 plot(type='line_plot', data=weights, name='stage1.layers.0.0.layer_norm1.weight')
-
-# %% curve using bin centers
-for i in layer1.keys():
-    counts, bins = np.histogram(layer1[i], bins=10)
-    bin_centers = (bins[:-1] + bins[1:]) / 2
-    plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
-plt.legend(loc='right')
-plt.show()
 
 # %%
 path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
