@@ -7,8 +7,7 @@ from typing import Dict, Literal
 from swin import swin_transformer
 from config import Config
 
-# %% Giving the path
-DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
+# %% Curve plot from histogram
 # curve using bin centers
 # for i in layer1.keys():
 #     counts, bins = np.histogram(layer1[i], bins=10)
@@ -17,6 +16,8 @@ DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 # plt.legend(loc='right')
 # plt.show()
 
+# %% Device
+DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 # %% defining functions
 mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
 mdls = os.listdir(mdl_pth)
