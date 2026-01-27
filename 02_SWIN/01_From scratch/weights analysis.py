@@ -19,11 +19,10 @@ from config import Config
 # %% Device
 DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 # %% defining functions
-mdl_pth = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom"
-mdls = os.listdir(mdl_pth)
-file_sorted = sorted(mdls, key=lambda x: int(x.split('-')[-1].split('.')[0]))
-
-def get_weights(layer_name: str):
+def get_weights(layer_name: str, num_classes: int, dataset_name: str):
+    mdl_pth = f"C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\{dataset_name}\\custom"
+    mdls = os.listdir(mdl_pth)
+    file_sorted = sorted(mdls, key=lambda x: int(x.split('-')[-1].split('.')[0]))
     weights = dict()
     for m in file_sorted:
         if 'pt' in m:
@@ -31,13 +30,13 @@ def get_weights(layer_name: str):
             model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                             downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
                             head_dim=Config.head_dim, window_size=Config.window_size, 
-                            relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
+                            relative_position=Config.relative_pos, num_clas=num_classes).to(DEVICE)
             model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
             state_dict = model.state_dict()
             weights[m.split('.')[0]] = state_dict[layer_name].detach().cpu().reshape(-1).tolist()
     return weights
 
-def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
+def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name: str):
     plt.figure(figsize=(15, 5))
     if type == 'hist':
         for i in data.keys():
@@ -45,7 +44,7 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
             plt.legend(loc='upper right')
             plt.xlabel('Weights')
             plt.ylabel('Epochs')
-            plt.title(f'SVHN | Layer-1 | {name}')
+            plt.title(f'{dataset_name} | Layer - {name}')
             plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
         plt.show()
     elif type == 'line_plot':
@@ -57,7 +56,7 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str):
                 plt.plot(range(0,110,10), data[layer_no], label=f'ly-{layer_no}')
                 layer_no += 1
             plt.legend(loc='upper right')
-            plt.suptitle(f'SVHN | LayerNorm1 (gamma) | {name}', y=0.93, x=0.51, fontsize=30)
+            plt.suptitle(f'{dataset_name} | LayerNorm - {name}', y=0.93, x=0.51, fontsize=30)
         plt.show()
 
 def arrange_norm(data: Dict):
@@ -79,12 +78,21 @@ weights = get_weights(layer_name = 'stage1.layers.0.0.layer_norm1.weight')
 weights = arrange_norm(weights)
 plot(type='line_plot', data=weights, name='stage1.layers.0.0.layer_norm1.weight')
 
+# %% stage1.layers.0.0.window_attn.qkv.weight
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+
+weights = get_weights(layer_name = 'stage1.layers.0.0.window_attn.qkv.weight', num_classes=num_classes, d_name=dataset)
+plot(type='hist', data=weights, name='stage1.layers.0.0.window_attn.qkv.weight', dataset_name=dataset)
+
 # %%
 path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
 model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                                 downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
                                 head_dim=Config.head_dim, window_size=Config.window_size, 
-                                relative_position=Config.relative_pos, num_clas=10).to(DEVICE)
+                                relative_position=Config.relative_pos, num_clas=211).to(DEVICE)
 model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), strict = False)
 # weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
 weights = model.stage1.down_scale.linear.weight.detach().cpu().tolist()
