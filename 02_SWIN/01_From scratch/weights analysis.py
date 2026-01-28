@@ -7,18 +7,9 @@ from typing import Dict, Literal
 from swin import swin_transformer
 from config import Config
 
-# %% Curve plot from histogram
-# curve using bin centers
-# for i in layer1.keys():
-#     counts, bins = np.histogram(layer1[i], bins=10)
-#     bin_centers = (bins[:-1] + bins[1:]) / 2
-#     plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
-# plt.legend(loc='right')
-# plt.show()
-
-# %% Device
-DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
 # %% defining functions
+DEVICE = 'cuda' if t.cuda.is_available() else 'cpu'
+
 def get_weights(layer_name: str, num_classes: int, dataset_name: str):
     mdl_pth = f"C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\{dataset_name}\\custom"
     mdls = os.listdir(mdl_pth)
@@ -69,37 +60,54 @@ def arrange_norm(data: Dict):
 
     return plotting_data
 
-# %% plot layer1
-weights = get_weights(layer_name = 'stage1.down_scale.linear.weight')
-plot(type='hist', data=weights, name='stage1.down_scale.linear.weight')
+# %% Curve plot from histogram
+# curve using bin centers
+# for i in layer1.keys():
+#     counts, bins = np.histogram(layer1[i], bins=10)
+#     bin_centers = (bins[:-1] + bins[1:]) / 2
+#     plt.plot(bin_centers, counts, label='E-'+i.split('-')[1].split('.')[0], alpha=0.5)
+# plt.legend(loc='right')
+# plt.show()
 
-# %% norm1
-weights = get_weights(layer_name = 'stage1.layers.0.0.layer_norm1.weight')
-weights = arrange_norm(weights)
-plot(type='line_plot', data=weights, name='stage1.layers.0.0.layer_norm1.weight')
+# %% stage1.down_scale.linear.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.down_scale.linear.weight'
 
-# %% stage1.layers.0.0.window_attn.qkv.weight
+
+weights = get_weights(layer_name = layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% 'stage1.layers.0.0.layer_norm1.weight'
 dataset = 'food'
 num_classes = 211
 # dataset = 'numbers'
 # num_classes = 10
+layer_name = 'stage1.layers.0.0.layer_norm1.weight'
 
-weights = get_weights(layer_name = 'stage1.layers.0.0.window_attn.qkv.weight', num_classes=num_classes, d_name=dataset)
-plot(type='hist', data=weights, name='stage1.layers.0.0.window_attn.qkv.weight', dataset_name=dataset)
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+weights = arrange_norm(weights)
+plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
 
-# %%
-path = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\numbers\\custom\\mdl-100.pt"
-model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
-                                downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
-                                head_dim=Config.head_dim, window_size=Config.window_size, 
-                                relative_position=Config.relative_pos, num_clas=211).to(DEVICE)
-model.load_state_dict(t.load(path, map_location = DEVICE, weights_only = True), strict = False)
-# weights = model.stage1.layers[0][0].window_attn.qkv.weight.detach().cpu().tolist()
-weights = model.stage1.down_scale.linear.weight.detach().cpu().tolist()
+# %% stage1.layers.0.0.window_attn.qkv.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.layers.0.0.window_attn.qkv.weight'
 
 
-# %%
-list(model.state_dict().keys())
-# %%
-plt.hist(weights, histtype='step')
-# %%
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.window_attn.to_out.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.layers.0.0.window_attn.to_out.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
