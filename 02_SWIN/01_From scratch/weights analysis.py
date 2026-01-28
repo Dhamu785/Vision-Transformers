@@ -111,3 +111,125 @@ layer_name = 'stage1.layers.0.0.window_attn.to_out.weight'
 
 weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
 plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.window_attn.to_out.bias
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+layer_name = 'stage1.layers.0.0.window_attn.to_out.bias'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.mlp.0.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.layers.0.0.mlp.0.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+# %% stage1.layers.0.0.mlp.0.bias
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+layer_name = 'stage1.layers.0.0.mlp.0.bias'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.mlp.2.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.layers.0.0.mlp.2.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.mlp.2.bias
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+layer_name = 'stage1.layers.0.0.mlp.2.bias'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+# %% stage1.layers.0.0.layer_norm2.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage1.layers.0.0.layer_norm2.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+weights = arrange_norm(weights)
+plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage1.layers.0.0.layer_norm2.bias
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+layer_name = 'stage1.layers.0.0.layer_norm2.bias'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+weights = arrange_norm(weights)
+plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage2.down_scale.linear.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage2.down_scale.linear.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage3.down_scale.linear.weight
+dataset = 'food'
+num_classes = 211
+# dataset = 'numbers'
+# num_classes = 10
+layer_name = 'stage3.down_scale.linear.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% stage4.down_scale.linear.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'stage4.down_scale.linear.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% mlp.2.weight
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'mlp.2.weight'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %% mlp.2.bias
+# dataset = 'food'
+# num_classes = 211
+dataset = 'numbers'
+num_classes = 10
+layer_name = 'mlp.3.bias'
+
+weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
+plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
+
+# %%
