@@ -50,6 +50,29 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name
             plt.suptitle(f'{dataset_name} | LayerNorm - {name}', y=0.93, x=0.51, fontsize=30)
         plt.show()
 
+def multi_plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name: str, file_name: int):
+    plt.figure(figsize=(15, 5))
+    if type == 'hist':
+        for i in data.keys():
+            plt.hist(data[i], histtype='step', label='E-'+i.split('-')[1].split('.')[0], alpha=0.8)
+            plt.legend(loc='upper right')
+            plt.xlabel('Weights')
+            plt.ylabel('Epochs')
+            plt.title(f'{dataset_name} | Layer - {name}')
+            plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
+        plt.savefig(f'{file_name}.png')
+    elif type == 'line_plot':
+        layer_no = 0
+        plt.figure(figsize=(25,15))
+        for i in range(1, 13):
+            plt.subplot(3, 4, i)
+            for j in range(layer_no, layer_no+8):
+                plt.plot(range(0,110,10), data[layer_no], label=f'ly-{layer_no}')
+                layer_no += 1
+            plt.legend(loc='upper right')
+            plt.suptitle(f'{dataset_name} | LayerNorm - {name}', y=0.93, x=0.51, fontsize=30)
+        plt.savefig(f'{file_name}.png')
+
 def arrange_norm(data: Dict):
     layer_count = int(len(list(data.values())[0]))
     plotting_data = dict()
@@ -90,146 +113,4 @@ layer_name = 'stage1.layers.0.0.layer_norm1.weight'
 weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
 weights = arrange_norm(weights)
 plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.window_attn.qkv.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage1.layers.0.0.window_attn.qkv.weight'
-
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.window_attn.to_out.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage1.layers.0.0.window_attn.to_out.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.window_attn.to_out.bias
-dataset = 'food'
-num_classes = 211
-# dataset = 'numbers'
-# num_classes = 10
-layer_name = 'stage1.layers.0.0.window_attn.to_out.bias'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.mlp.0.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage1.layers.0.0.mlp.0.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-# %% stage1.layers.0.0.mlp.0.bias
-dataset = 'food'
-num_classes = 211
-# dataset = 'numbers'
-# num_classes = 10
-layer_name = 'stage1.layers.0.0.mlp.0.bias'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.mlp.2.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage1.layers.0.0.mlp.2.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.mlp.2.bias
-dataset = 'food'
-num_classes = 211
-# dataset = 'numbers'
-# num_classes = 10
-layer_name = 'stage1.layers.0.0.mlp.2.bias'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-# %% stage1.layers.0.0.layer_norm2.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage1.layers.0.0.layer_norm2.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-weights = arrange_norm(weights)
-plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage1.layers.0.0.layer_norm2.bias
-dataset = 'food'
-num_classes = 211
-# dataset = 'numbers'
-# num_classes = 10
-layer_name = 'stage1.layers.0.0.layer_norm2.bias'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-weights = arrange_norm(weights)
-plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage2.down_scale.linear.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage2.down_scale.linear.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage3.down_scale.linear.weight
-dataset = 'food'
-num_classes = 211
-# dataset = 'numbers'
-# num_classes = 10
-layer_name = 'stage3.down_scale.linear.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% stage4.down_scale.linear.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'stage4.down_scale.linear.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% mlp.2.weight
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'mlp.2.weight'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %% mlp.2.bias
-# dataset = 'food'
-# num_classes = 211
-dataset = 'numbers'
-num_classes = 10
-layer_name = 'mlp.3.bias'
-
-weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_name=dataset)
-plot(type='hist', data=weights, name=layer_name, dataset_name=dataset)
-
-# %%
+# %% multiple plots
