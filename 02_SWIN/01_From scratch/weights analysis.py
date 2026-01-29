@@ -50,7 +50,7 @@ def plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name
             plt.suptitle(f'{dataset_name} | LayerNorm - {name}', y=0.93, x=0.51, fontsize=30)
         plt.show()
 
-def multi_plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name: str, file_name: int):
+def multi_plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, dataset_name: str, file_name: int, sav_loc=os.PathLike):
     plt.figure(figsize=(15, 5))
     if type == 'hist':
         for i in data.keys():
@@ -60,7 +60,8 @@ def multi_plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, datase
             plt.ylabel('Epochs')
             plt.title(f'{dataset_name} | Layer - {name}')
             plt.grid(visible=True, axis='both', which='both', color='#a1a1a1', linestyle='-', linewidth=1, mec='#00cefc')
-        plt.savefig(f'{file_name}.png')
+        sav = os.path.join(sav_loc, str(file_name)+'.png')
+        plt.savefig(sav)
     elif type == 'line_plot':
         layer_no = 0
         plt.figure(figsize=(25,15))
@@ -71,7 +72,8 @@ def multi_plot(type: Literal['hist', 'line_plot'], data: Dict, name: str, datase
                 layer_no += 1
             plt.legend(loc='upper right')
             plt.suptitle(f'{dataset_name} | LayerNorm - {name}', y=0.93, x=0.51, fontsize=30)
-        plt.savefig(f'{file_name}.png')
+        sav = os.path.join(sav_loc, str(file_name)+'.png')
+        plt.savefig(sav)
 
 def arrange_norm(data: Dict):
     layer_count = int(len(list(data.values())[0]))
@@ -114,3 +116,90 @@ weights = get_weights(layer_name=layer_name, num_classes=num_classes, dataset_na
 weights = arrange_norm(weights)
 plot(type='line_plot', data=weights, name=layer_name, dataset_name=dataset)
 # %% multiple plots
+weights_layers = ['stage1.down_scale.linear.weight', 'stage1.layers.0.0.window_attn.qkv.weight',
+            'stage1.layers.0.0.window_attn.to_out.weight', 'stage1.layers.0.0.window_attn.to_out.bias',
+            'stage1.layers.0.0.mlp.0.weight', 'stage1.layers.0.0.mlp.0.bias', 'stage1.layers.0.0.mlp.2.weight',
+            'stage1.layers.0.0.mlp.2.bias', 'stage1.layers.0.1.window_attn.qkv.weight', 
+            'stage1.layers.0.1.window_attn.to_out.weight', 'stage1.layers.0.1.window_attn.to_out.bias',
+            'stage1.layers.0.1.mlp.0.weight', 'stage1.layers.0.1.mlp.0.bias',
+            'stage1.layers.0.1.mlp.2.weight', 'stage1.layers.0.1.mlp.2.bias']
+norm_layers = ['stage1.layers.0.0.layer_norm1.weight', 'stage1.layers.0.0.layer_norm1.bias',
+                'stage1.layers.0.0.layer_norm2.weight', 'stage1.layers.0.0.layer_norm2.bias',
+                'stage1.layers.0.1.layer_norm1.weight', 'stage1.layers.0.1.layer_norm1.bias',
+                'stage1.layers.0.1.layer_norm2.weight', 'stage1.layers.0.1.layer_norm2.bias']
+
+stage2_wgt = ['stage2.down_scale.linear.weight', 'stage2.layers.0.0.window_attn.qkv.weight',
+                'stage2.layers.0.0.window_attn.to_out.weight', 'stage2.layers.0.0.window_attn.to_out.bias',
+                'stage2.layers.0.0.mlp.0.weight', 'stage2.layers.0.0.mlp.0.bias', 'stage2.layers.0.0.mlp.2.weight',
+                'stage2.layers.0.0.mlp.2.bias', 'stage2.layers.0.1.window_attn.qkv.weight',
+                'stage2.layers.0.1.window_attn.to_out.weight', 'stage2.layers.0.1.window_attn.to_out.bias',
+                'stage2.layers.0.1.mlp.0.weight', 'stage2.layers.0.1.mlp.0.bias', 'stage2.layers.0.1.mlp.2.weight',
+                'stage2.layers.0.1.mlp.2.bias']
+stage2_norm = ['stage2.layers.0.0.layer_norm1.weight', 'stage2.layers.0.0.layer_norm1.bias',
+                'stage2.layers.0.0.layer_norm2.weight', 'stage2.layers.0.0.layer_norm2.bias',
+                'stage2.layers.0.1.layer_norm1.weight', 'stage2.layers.0.1.layer_norm1.bias',
+                'stage2.layers.0.1.layer_norm2.weight', 'stage2.layers.0.1.layer_norm2.bias',]
+
+stage3_wgt = ['stage3.down_scale.linear.weight', 'stage3.layers.0.0.window_attn.qkv.weight', 'stage3.layers.0.0.window_attn.to_out.weight',
+                'stage3.layers.0.0.window_attn.to_out.bias', 'stage3.layers.0.0.mlp.0.weight', 'stage3.layers.0.0.mlp.0.bias',
+                'stage3.layers.0.0.mlp.2.weight', 'stage3.layers.0.0.mlp.2.bias', 'stage3.layers.0.1.window_attn.qkv.weight',
+                'stage3.layers.0.1.window_attn.to_out.weight', 'stage3.layers.0.1.window_attn.to_out.bias',
+                'stage3.layers.0.1.mlp.0.weight', 'stage3.layers.0.1.mlp.0.bias', 'stage3.layers.0.1.mlp.2.weight',
+                'stage3.layers.0.1.mlp.2.bias', 'stage3.layers.1.0.window_attn.qkv.weight', 'stage3.layers.1.0.window_attn.to_out.weight',
+                'stage3.layers.1.0.window_attn.to_out.bias', 'stage3.layers.1.0.mlp.0.weight', 'stage3.layers.1.0.mlp.0.bias',
+                'stage3.layers.1.0.mlp.2.weight', 'stage3.layers.1.0.mlp.2.bias', 'stage3.layers.1.1.window_attn.qkv.weight',
+                'stage3.layers.1.1.window_attn.to_out.weight', 'stage3.layers.1.1.window_attn.to_out.bias',
+                'stage3.layers.1.1.mlp.0.weight', 'stage3.layers.1.1.mlp.0.bias', 'stage3.layers.1.1.mlp.2.weight',
+                'stage3.layers.1.1.mlp.2.bias', 'stage3.layers.2.0.window_attn.qkv.weight', 'stage3.layers.2.0.window_attn.to_out.weight',
+                'stage3.layers.2.0.window_attn.to_out.bias', 'stage3.layers.2.0.mlp.0.weight', 'stage3.layers.2.0.mlp.0.bias',
+                'stage3.layers.2.0.mlp.2.weight', 'stage3.layers.2.0.mlp.2.bias', 'stage3.layers.2.1.window_attn.qkv.weight',
+                'stage3.layers.2.1.window_attn.to_out.weight', 'stage3.layers.2.1.window_attn.to_out.bias',
+                'stage3.layers.2.1.mlp.0.weight', 'stage3.layers.2.1.mlp.0.bias', 'stage3.layers.2.1.mlp.2.weight',
+                'stage3.layers.2.1.mlp.2.bias']
+stage3_norm = ['stage3.layers.0.0.layer_norm1.weight', 'stage3.layers.0.0.layer_norm1.bias',
+                'stage3.layers.0.0.layer_norm2.weight', 'stage3.layers.0.0.layer_norm2.bias',
+                'stage3.layers.0.1.layer_norm1.weight', 'stage3.layers.0.1.layer_norm1.bias', 
+                'stage3.layers.0.1.layer_norm2.weight', 'stage3.layers.0.1.layer_norm2.bias',
+                'stage3.layers.1.0.layer_norm1.weight', 'stage3.layers.1.0.layer_norm1.bias',
+                'stage3.layers.1.0.layer_norm2.weight', 'stage3.layers.1.0.layer_norm2.bias',
+                'stage3.layers.1.1.layer_norm1.weight', 'stage3.layers.1.1.layer_norm1.bias',
+                'stage3.layers.1.1.layer_norm2.weight', 'stage3.layers.1.1.layer_norm2.bias',
+                'stage3.layers.2.0.layer_norm1.weight', 'stage3.layers.2.0.layer_norm1.bias',
+                'stage3.layers.2.0.layer_norm2.weight', 'stage3.layers.2.0.layer_norm2.bias',
+                'stage3.layers.2.1.layer_norm1.weight', 'stage3.layers.2.1.layer_norm1.bias',
+                'stage3.layers.2.1.layer_norm2.weight', 'stage3.layers.2.1.layer_norm2.bias']
+
+stage4_wgt = ['stage4.down_scale.linear.weight', 'stage4.layers.0.0.window_attn.qkv.weight',
+                'stage4.layers.0.0.window_attn.to_out.weight', 'stage4.layers.0.0.window_attn.to_out.bias',
+                'stage4.layers.0.0.mlp.0.weight', 'stage4.layers.0.0.mlp.0.bias', 'stage4.layers.0.0.mlp.2.weight',
+                'stage4.layers.0.0.mlp.2.bias', 'stage4.layers.0.1.window_attn.qkv.weight',
+                'stage4.layers.0.1.window_attn.to_out.weight', 'stage4.layers.0.1.window_attn.to_out.bias',
+                'stage4.layers.0.1.mlp.0.weight', 'stage4.layers.0.1.mlp.0.bias', 'stage4.layers.0.1.mlp.2.weight',
+                'stage4.layers.0.1.mlp.2.bias', 'mlp.2.weight', 'mlp.2.bias', 'mlp.3.weight', 'mlp.3.bias']
+stage4_norm = ['stage4.layers.0.0.layer_norm1.weight', 'stage4.layers.0.0.layer_norm1.bias',
+                'stage4.layers.0.0.layer_norm2.weight', 'stage4.layers.0.0.layer_norm2.bias',
+                'stage4.layers.0.1.layer_norm1.weight', 'stage4.layers.0.1.layer_norm1.bias',
+                'stage4.layers.0.1.layer_norm2.weight', 'stage4.layers.0.1.layer_norm2.bias',]
+
+# %%  weights plot
+dataset = 'numbers'
+num_classes = 10
+sav_loc = r'C:\Users\dhamu\Downloads\Plots\stage1-numbers_norm'
+
+for i in range(len(stage4_wgt)):
+    layer_name = stage4_wgt[i]
+
+    weights = get_weights(layer_name = layer_name, num_classes=num_classes, dataset_name=dataset)
+    multi_plot(type='hist', data=weights, name=layer_name, dataset_name=dataset, file_name=i, sav_loc=sav_loc)
+# %% norm plot
+dataset = 'numbers'
+num_classes = 10
+sav_loc = r'C:\Users\dhamu\Downloads\Plots\numbers\stage2-norm'
+
+for i in range(len(stage2_norm)):
+    layer_name = stage2_norm[i]
+
+    weights = get_weights(layer_name = layer_name, num_classes=num_classes, dataset_name=dataset)
+    arranged = arrange_norm(weights)
+    multi_plot(type='line_plot', data=arranged, name=layer_name, dataset_name=dataset, file_name=i, sav_loc=sav_loc)
+# %%
