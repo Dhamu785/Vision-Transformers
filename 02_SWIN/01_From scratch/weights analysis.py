@@ -206,17 +206,14 @@ for i in range(len(stage2_norm)):
 import matplotlib.pyplot as plt
 import cv2
 
-plt.figure(figsize=(100, 40))
-path = r'C:\Users\dhamu\Downloads\Plots\food\stage4-wgt'
+plt.figure(figsize=(200, 60))
+path = r'C:\Users\dhamu\Downloads\Plots\numbers\stage1-norm'
 plots = os.listdir(path)
 count = len(plots)
 for i in range(count):
     img_data = cv2.imread(os.path.join(path, plots[i]))
-    plt.subplot(4, 5, i+1)
+    plt.subplot(2, 4, i+1)
     plt.axis('off')
     plt.imshow(img_data)
 
 plt.show()
-# %%
-print(12)
-# %%
