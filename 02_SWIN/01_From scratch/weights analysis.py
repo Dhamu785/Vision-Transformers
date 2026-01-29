@@ -202,4 +202,21 @@ for i in range(len(stage2_norm)):
     weights = get_weights(layer_name = layer_name, num_classes=num_classes, dataset_name=dataset)
     arranged = arrange_norm(weights)
     multi_plot(type='line_plot', data=arranged, name=layer_name, dataset_name=dataset, file_name=i, sav_loc=sav_loc)
+# %% Arranging the plots
+import matplotlib.pyplot as plt
+import cv2
+
+plt.figure(figsize=(100, 40))
+path = r'C:\Users\dhamu\Downloads\Plots\food\stage4-wgt'
+plots = os.listdir(path)
+count = len(plots)
+for i in range(count):
+    img_data = cv2.imread(os.path.join(path, plots[i]))
+    plt.subplot(4, 5, i+1)
+    plt.axis('off')
+    plt.imshow(img_data)
+
+plt.show()
+# %%
+print(12)
 # %%
