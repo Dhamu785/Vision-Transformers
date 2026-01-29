@@ -217,3 +217,18 @@ for i in range(count):
     plt.imshow(img_data)
 
 plt.show()
+
+# %% analysis buffers
+mdl = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\food\\custom\\mdl-100.pt"
+num_classes = 211
+
+model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
+                            downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
+                            head_dim=Config.head_dim, window_size=Config.window_size, 
+                            relative_position=Config.relative_pos, num_clas=num_classes).to(DEVICE)
+model.load_state_dict(t.load(mdl, map_location = DEVICE, weights_only = True), strict = False)
+
+# %%
+state_dict = model.state_dict()
+state_dict['stage1.layers.0.0.window_attn.ref_tab'].shape
+# %%
