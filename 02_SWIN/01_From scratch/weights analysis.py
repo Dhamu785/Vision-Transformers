@@ -219,8 +219,9 @@ for i in range(count):
 plt.show()
 
 # %% analysis buffers
-mdl = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\food\\custom\\mdl-100.pt"
-num_classes = 211
+# mdl = "C:\\Users\\dhamu\\Downloads\\SWIN\\Sample models\\food\\custom\\mdl-100.pt"
+mdl = "/Users/dhamodharan/My-Python/AI-Tutorials/SWIN supportings/Sample models/numbers/custom/mdl-1.pt"
+num_classes = 10
 
 model = swin_transformer(in_channels=Config.in_channels, hidden_dim=Config.hidden_dim, layers=Config.layers, 
                             downscaling_factor=Config.downscaling_factor, heads=Config.heads, 
