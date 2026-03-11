@@ -31,12 +31,16 @@ img_t = transform(img).unsqueeze(0).repeat(64,1,1,1).to(DEVICE)
 # %% Profiler
 with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
                 schedule=schedule(wait=0, warmup=1, active=3),
-                on_trace_ready=tensorboard_trace_handler('log-GPU'),
-                record_shapes=True, profile_memory=True, with_flops=True) as prof:
+                on_trace_ready=tensorboard_trace_handler('.\\logs\\batch64\\profile'),
+                record_shapes=True, profile_memory=True, with_flops=True,
+                with_stack=True, with_modules=True) as prof:
     with t.inference_mode():
         for i in range(10):
             model(img_t)
             prof.step()
 # %%
-print(img_t.device)
-print(next(model.parameters()).device)
+print(prof.key_averages().table(
+    sort_by="cpu_time_total",
+    row_limit=200
+))
+# %%
